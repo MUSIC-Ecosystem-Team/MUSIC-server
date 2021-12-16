@@ -1,4 +1,3 @@
-from types import NoneType
 from flask import Flask, Response, redirect, url_for, request
 import json
 from tags import MusicFileHandler
@@ -23,7 +22,7 @@ def database_informations():
 
    infos = db.getDatabaseInformations()
    content = {"name": "", "description": ""}
-   if not isinstance(infos, NoneType):
+   if not isinstance(infos, type(None)):
       content["name"] = infos[1]
       content["description"] = infos[2]
       retCode = 0
@@ -33,7 +32,7 @@ def database_informations():
 
 @app.route('/test-music')
 def test_tags():
-   music = MusicFileHandler("test-files/04 Just a Dream.mp3")
+   music = MusicFileHandler("musics/04 Just a Dream.mp3")
 
    if not music.OK():
       exit(1)

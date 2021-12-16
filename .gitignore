@@ -1,5 +1,7 @@
 musics/
+__pycache__/
 db.json
 links.txt
 a.out
 test.db
+music.db

@@ -1,14 +1,13 @@
-from types import NoneType
 import mutagen
 
-file_path = "test-files/04 Just a Dream.mp3"
-#file_path = "test-files/02. Von Kaiser - Wavelengths.flac"
+file_path = "musics/04 Just a Dream.mp3"
+#file_path = "musics/02. Von Kaiser - Wavelengths.flac"
 
 class MusicFileHandler:
     def __init__(self, filePath):
         self.musicFile = mutagen.File(filePath)
         self.fileType = ""
-        if isinstance(self.musicFile, NoneType):
+        if isinstance(self.musicFile, type(None)):
             #print("file: no tags found")
             pass
         elif isinstance(self.musicFile, mutagen.mp3.MP3):
@@ -28,7 +27,7 @@ class MusicFileHandler:
         elif self.fileType == "flac":
             return self.getFlacTags()
         else:
-            return NoneType
+            return None
 
     def getMp3Tags(self):
         tags = {}

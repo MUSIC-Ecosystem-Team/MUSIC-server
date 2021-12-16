@@ -1,5 +1,4 @@
 import sqlite3
-from types import NoneType
 
 class DatabaseHandler:
     def __init__(self, dbPath):
@@ -10,7 +9,7 @@ class DatabaseHandler:
             cursorObj.execute("CREATE TABLE IF NOT EXISTS database_informations(id integer PRIMARY KEY AUTOINCREMENT, name text, description text)")
             self.con.commit()
 
-            if self.getDatabaseInformations() == NoneType:
+            if self.getDatabaseInformations() == None:
                 cursorObj.execute("INSERT INTO database_informations(name, description) VALUES('Music! Database', 'Sample description')")
                 self.con.commit()
 
@@ -27,7 +26,7 @@ class DatabaseHandler:
 
         row = cursorObj.fetchall()
         if row.__len__() < 1:
-            return NoneType
+            return None
         else:
             return row[0]
 
