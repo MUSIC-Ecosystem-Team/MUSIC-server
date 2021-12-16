@@ -1,8 +1,25 @@
 # SERVER API
 
+- [SERVER API](#server-api)
+- [Endpoints](#endpoints)
+  - [Music request](#music-request)
+  - [Music database request](#music-database-request)
+  - [Album request](#album-request)
+  - [Album database request](#album-database-request)
+  - [Artist database request](#artist-database-request)
+  - [Artist request](#artist-request)
+  - [Artist database request](#artist-database-request-1)
+  - [Create user](#create-user)
+  - [Get user informations](#get-user-informations)
+- [Malformed request](#malformed-request)
+
+<br>
+
+# Endpoints
+
 ## Music request
 
-endpoint: /music
+endpoint: /get-music/<id>
 
 method: GET
 
@@ -11,11 +28,30 @@ parameters:
 
 response: a direct link to the music file
 
+```json
+{
+    "code": "integer",
+    "message": "string",
+    "response": {
+        "album_id": "integer",
+        "artistalbum": "string",
+        "artist": "string",
+        "comment": "string",
+        "filename": "string",
+        "genre": "string",
+        "id": "integer",
+        "title": "string",
+        "track_number": "integer",
+        "year": "integer"
+    }
+}
+```
+
 <br>
 
 ## Music database request
 
-endpoint: /music-db
+endpoint: /get-musics/
 
 method: GET
 
@@ -27,7 +63,8 @@ response: a json file
 ```json
 {
     "code": "integer",
-    "musics": [
+    "message": "string",
+    "response": [
         {
             "album_id": "integer",
             "artist": "string",
@@ -49,9 +86,9 @@ strings can be unicode, o/ kanjis
 
 <br>
 
-## Album database request
+## Album request
 
-endpoint: /album-db
+endpoint: /get-album/<id>
 
 method: GET
 
@@ -63,7 +100,42 @@ response: a json file
 ```json
 {
     "code": "integer",
-    "albums": [
+    "response": [
+        {
+            "artist_id": "integer",
+            "artist_name": "string",
+            "id": "integer",
+            "img": "string",
+            "name": "string",
+            "year": "integer"
+        },
+        {"..."}
+    ]
+}
+```
+```
+strings can be unicode, o/ kanjis
+```
+
+<br>
+
+<br>
+
+## Album database request
+
+endpoint: /get-albums
+
+method: GET
+
+parameters:
+- id: integer
+
+response: a json file
+
+```json
+{
+    "code": "integer",
+    "response": [
         {
             "artist_id": "integer",
             "artist_name": "string",
@@ -86,7 +158,64 @@ strings can be unicode, o/ kanjis
 
 ## Artist database request
 
-endpoint: /artist-db
+endpoint: /get-artists
+
+method: GET
+
+parameters:
+- id: integer
+
+response: a json file
+
+```json
+{
+    "code": "integer",
+    "artists": [
+        {
+            "id": "integer",
+            "img": "string",
+            "name": "string"
+        },
+        {"..."}
+    ]
+}
+```
+```
+strings can be unicode, o/ kanjis
+```
+
+<br>
+
+## Artist request
+
+endpoint: /get-artist/<id>
+
+method: GET
+
+parameters:
+- id: integer
+
+response: a json file
+
+```json
+{
+    "code": "integer",
+    "artists": {
+        "id": "integer",
+        "img": "string",
+        "name": "string"
+    }
+}
+```
+```
+strings can be unicode, o/ kanjis
+```
+
+<br>
+
+## Artist database request
+
+endpoint: /get-artist
 
 method: GET
 
@@ -167,7 +296,7 @@ response: a json file
 
 <br>
 
-## Malformed request
+# Malformed request
 
 When a malformed request occur (e.g. parameters missing, POST used instead of GET, ...), a generic error message is sent.
 

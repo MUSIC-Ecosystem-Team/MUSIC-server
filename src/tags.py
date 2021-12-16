@@ -1,7 +1,5 @@
 import mutagen
 
-file_path = "musics/04 Just a Dream.mp3"
-#file_path = "musics/02. Von Kaiser - Wavelengths.flac"
 
 class MusicFileHandler:
     def __init__(self, filePath):
@@ -57,13 +55,6 @@ class MusicFileHandler:
         return tags
 
 
-
-music = MusicFileHandler(file_path)
-
-if not music.OK():
-    exit(1)
-
-print(music.getTags())
 
 """ with open("cover", "wb") as cover:
     #cover.write(musicTags.get("APIC:").data)
