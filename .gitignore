@@ -5,3 +5,5 @@ links.txt
 a.out
 test.db
 music.db
+tmp
+flask_session/

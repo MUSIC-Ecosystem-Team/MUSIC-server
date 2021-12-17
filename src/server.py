@@ -1,10 +1,15 @@
 from flask import Flask, Response, redirect, url_for, request, send_file, session
 from werkzeug.utils import header_property
 from flask_session import Session
+from werkzeug.utils import secure_filename
 import json
 from tags import MusicFileHandler
 from database import DatabaseHandler
 from utils import returnJSON
+
+# Normalize file names from uploads
+from unicodedata import normalize
+from os import path
 
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
@@ -65,27 +70,46 @@ Musics
 
 
 /create-playlist POST
+
+/upload-music POST
 """
 @app.route('/get-musics')
-def get_musics():
-   
+def getMusics():
    return ""
 
 @app.route('/get-music/<int:id>')
-def get_music(id:int):
+def getMusic(id:int):
    return ""
 
 @app.route('/get-music-file/<int:id>')
-def get_music_file(id:int):
+def getMusicFile(id:int):
    return ""
 
 @app.route('/get-artists')
-def get_artists(id:int):
+def getArtists(id:int):
    return ""
 
 @app.route('/get-artist/<int:id>')
-def get_artist(id:int):
+def getArtist(id:int):
    return ""
+
+@app.route('/upload-music', methods = ["POST"])
+def uploadMusic():
+   f = request.files["music"]
+   # https://blog.csdn.net/qq_36390239/article/details/98847888 nice
+   filename = normalize('NFKD', f.filename).encode('utf-8', ).decode()
+   for sep in  path.sep, path.altsep:
+      if sep:
+         filename = filename.replace(sep, ' ')
+
+   f.save("downloads/" + filename)
+
+   music = MusicFileHandler("downloads/" + filename)
+
+   if not music.OK():
+      return returnJSON(-1, "Error getting tags")
+
+   return returnJSON("0", "Music saved as \"" + filename + "\"", music.getTags())
 
 """
 Session
@@ -183,7 +207,7 @@ def test_tags():
    music = MusicFileHandler("musics/04 Just a Dream.mp3")
 
    if not music.OK():
-      exit(1)
+      return returnJSON(-1, "Error getting tags")
 
    return returnJSON(0, "Success", music.getTags())
 
