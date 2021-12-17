@@ -80,40 +80,43 @@ Musics
 def getMusics():
    # Check connexion
    retCode = -1
-   retMessage = "No active session"
-   if not checkSession():
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
-   response = db.getMusicsForUser(session["user_id"])
+   response = db.getMusicsForUser(user_id)
    return returnJSON("0", "Success", response)
 
 @app.route('/get-music/<int:music_id>')
 def getMusic(music_id:int):
    # Check connexion
    retCode = -1
-   retMessage = "No active session"
-   if not checkSession():
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
-   response = db.getMusicForUser(music_id, session["user_id"])
+   response = db.getMusicForUser(music_id, user_id)
    return returnJSON("0", "Success", response)
 
 @app.route('/get-music-picture/<int:music_id>')
 def getMusicPicture(music_id:int):
    # Check connexion
    retCode = -1
-   retMessage = "No active session"
-   if not checkSession():
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
-   response = db.getMusicForUser(music_id, session["user_id"])
+   response = db.getMusicForUser(music_id, user_id)
    if response == {}:
       return returnJSON(-1, "Music does not exist")
    else:
-      album = db.getAlbum(response["album_id"], session["user_id"])
+      album = db.getAlbum(response["album_id"], user_id)
       return send_file(
          BytesIO(album[0][5]),
          mimetype=album[0][6],
@@ -124,12 +127,13 @@ def getMusicPicture(music_id:int):
 def getMusicFile(music_id:int):
    # Check connexion
    retCode = -1
-   retMessage = "No active session"
-   if not checkSession():
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
-   response = db.getMusicForUser(music_id, session["user_id"])
+   response = db.getMusicForUser(music_id, user_id)
    if response == {}:
       return returnJSON(-1, "File does not exist")
    else:
@@ -145,6 +149,14 @@ def getArtist(id:int):
 
 @app.route('/upload-music', methods = ["POST"])
 def uploadMusic():
+   # Check connexion
+   retCode = -1
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
    f = request.files["music"]
    # https://blog.csdn.net/qq_36390239/article/details/98847888 nice
    filename = normalize('NFKD', f.filename).encode('utf-8', ).decode()
@@ -160,14 +172,13 @@ def uploadMusic():
    if not music.OK():
       return returnJSON(-1, "Error getting tags")
    
-   db.addMusicToUser(filename, saving_path, session["user_id"])
+   db.addMusicToUser(filename, saving_path, user_id)
 
    return returnJSON("0", "Music saved as \"" + filename + "\"", music.getTags())
 
 """
 Session
 
-/login POST
 /register POST
 /get-token POST
 /logout GET
@@ -200,56 +211,17 @@ def getToken():
    retCode, retMessage, token = db.getUserToken(username, password)
    return returnJSON(retCode, retMessage, token)
 
-@app.route('/login', methods = ['POST'])
-def login():
-   retCode = -1
-   retMessage = "Missing token"
-   token = request.form.get("token")
-
-   if token == None:
-      return returnJSON(retCode, retMessage)
-
-   rowCheck = db.checkToken(token)
-   if len(rowCheck) < 1:
-      retCode = -1
-      retMessage = "Wrong token"
-      return returnJSON(retCode, retMessage)
-
-   retCode = 0
-   retMessage = "Success"
-   session["user_id"] = int(rowCheck[0][0])
-   session["username"] = rowCheck[0][1]
-   session["token"] = rowCheck[0][2]
-   response = {"user_id": session["user_id"], "username": session["username"]}
-
-   return returnJSON(retCode, retMessage, response)
-
-@app.route('/logout')
-def logout():
-   # Check connexion
-   retCode = -1
-   retMessage = "No active session"
-   if not checkSession():
-      return returnJSON(retCode, retMessage)
-   # Check connexion
-
-   session["user_id"] = None
-   session["username"] = None
-   retCode = 0
-   retMessage = "Success"
-   
-   return returnJSON(retCode, retMessage)
-
 @app.route('/user-infos')
 def userInfos():
    # Check connexion
    retCode = -1
-   retMessage = "No active session"
-   if not checkSession():
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
-   response = {"user_id": session["user_id"], "username": session["username"]}
+   response = {"user_id": user_id, "username": username}
    retCode = 0
    retMessage = "Success"
    
@@ -268,18 +240,17 @@ def test_tags():
    return returnJSON(0, "Success", music.getTags())
 
 
-def checkSession():
-   if session.get("user_id") == None or session.get("username") == None or session.get("token") == None:
-      return False
+def checkAuth():
+   token = request.headers.get('x-access-token')
+
+   if isinstance(token, type(None)) or token == "":
+      return False, 0, ""
    
-   user_id = session.get("user_id")
-   username = session.get("username")
-   token = session.get("token")
-   if db.checkSession(user_id, username, token):
-      return True
+   user = db.checkToken(token)
+   if len(user) > 0:
+      return True, user[0][0], user[0][1]
 
-   return False
-
+   return False, 0, ""
 
 if __name__ == '__main__':
    app.debug = True

@@ -126,19 +126,6 @@ class DatabaseHandler:
         row = cursorObj.fetchall()
         return row
 
-    def checkSession(self, user_id, username, token):
-        cursorObj = self.con.cursor()
-        cursorObj.execute("SELECT * FROM users WHERE id = ? AND username = ? LIMIT 1", (user_id, username))
-
-        row = cursorObj.fetchall()
-        if len(row) < 1:
-            return False
-        else:
-            user_token = row[0][2]
-            if user_token != token:
-                return False
-        return True
-
     def getUsers(self):
         cursorObj = self.con.cursor()
         cursorObj.execute("SELECT * FROM users")
