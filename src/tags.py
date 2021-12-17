@@ -31,9 +31,8 @@ class MusicFileHandler:
             return None
 
     def getMp3Tags(self):
-        tags = {}
+        tags = {"title": "", "artist": "", "albumartist": "", "album": "", "title": "", "tracknumber": "", "tracktotal": "", "discnumber": "", "disctotal": "", "date": "", "genre": ""}
         for tag in self.musicFile.tags:
-            print(tag)
 
             if isinstance(self.musicFile.tags[tag], mutagen.id3.TOAL):
                 tags["title"] = self.musicFile.tags[tag].text[0]
@@ -57,7 +56,7 @@ class MusicFileHandler:
         return tags
 
     def getFlacTags(self):
-        tags = {}
+        tags = {"title": "", "artist": "", "albumartist": "", "album": "", "title": "", "tracknumber": "", "tracktotal": "", "discnumber": "", "disctotal": "", "date": "", "genre": ""}
         for tag in self.musicFile.tags:
             tags[tag[0].lower()] = tag[1]
         return tags

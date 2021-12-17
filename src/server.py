@@ -102,12 +102,15 @@ def uploadMusic():
       if sep:
          filename = filename.replace(sep, ' ')
 
-   f.save("downloads/" + filename)
+   saving_path = "downloads/" + filename
+   f.save(saving_path)
 
-   music = MusicFileHandler("downloads/" + filename)
+   music = MusicFileHandler(saving_path)
 
    if not music.OK():
       return returnJSON(-1, "Error getting tags")
+   
+   db.addMusicToUser(filename, saving_path, session["user_id"])
 
    return returnJSON("0", "Music saved as \"" + filename + "\"", music.getTags())
 
@@ -204,7 +207,7 @@ def userInfos():
 
 @app.route('/test-music')
 def test_tags():
-   music = MusicFileHandler("musics/04 Just a Dream.mp3")
+   music = MusicFileHandler("musics/02. Von Kaiser - Wavelengths.flac")
 
    if not music.OK():
       return returnJSON(-1, "Error getting tags")
