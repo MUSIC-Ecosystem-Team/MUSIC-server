@@ -11,6 +11,9 @@ from utils import returnJSON
 from unicodedata import normalize
 from os import path
 
+# send music pictures
+from io import BytesIO
+
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
@@ -75,15 +78,62 @@ Musics
 """
 @app.route('/get-musics')
 def getMusics():
-   return ""
+   # Check connexion
+   retCode = -1
+   retMessage = "No active session"
+   if not checkSession():
+      return returnJSON(retCode, retMessage)
+   # Check connexion
 
-@app.route('/get-music/<int:id>')
-def getMusic(id:int):
-   return ""
+   response = db.getMusicsForUser(session["user_id"])
+   return returnJSON("0", "Success", response)
 
-@app.route('/get-music-file/<int:id>')
-def getMusicFile(id:int):
-   return ""
+@app.route('/get-music/<int:music_id>')
+def getMusic(music_id:int):
+   # Check connexion
+   retCode = -1
+   retMessage = "No active session"
+   if not checkSession():
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   response = db.getMusicForUser(music_id, session["user_id"])
+   return returnJSON("0", "Success", response)
+
+@app.route('/get-music-picture/<int:music_id>')
+def getMusicPicture(music_id:int):
+   # Check connexion
+   retCode = -1
+   retMessage = "No active session"
+   if not checkSession():
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   response = db.getMusicForUser(music_id, session["user_id"])
+   if response == {}:
+      return returnJSON(-1, "Music does not exist")
+   else:
+      album = db.getAlbum(response["album_id"], session["user_id"])
+      return send_file(
+         BytesIO(album[0][5]),
+         mimetype=album[0][6],
+         as_attachment=False,
+         download_name="cover")
+
+@app.route('/get-music-file/<int:music_id>')
+def getMusicFile(music_id:int):
+   # Check connexion
+   retCode = -1
+   retMessage = "No active session"
+   if not checkSession():
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   response = db.getMusicForUser(music_id, session["user_id"])
+   if response == {}:
+      return returnJSON(-1, "File does not exist")
+   else:
+      return send_file(response["path"])
 
 @app.route('/get-artists')
 def getArtists(id:int):
@@ -167,19 +217,21 @@ def login():
 
    retCode = 0
    retMessage = "Success"
-   session["user_id"] = rowCheck[0][0]
+   session["user_id"] = int(rowCheck[0][0])
    session["username"] = rowCheck[0][1]
-   username = {"user_id": session["user_id"], "username": session["username"]}
-   
-   return returnJSON(retCode, retMessage, username)
+   session["token"] = rowCheck[0][2]
+   response = {"user_id": session["user_id"], "username": session["username"]}
+
+   return returnJSON(retCode, retMessage, response)
 
 @app.route('/logout')
 def logout():
+   # Check connexion
    retCode = -1
    retMessage = "No active session"
-
-   if session.get("user_id") == None or session.get("username") == None:
+   if not checkSession():
       return returnJSON(retCode, retMessage)
+   # Check connexion
 
    session["user_id"] = None
    session["username"] = None
@@ -190,11 +242,12 @@ def logout():
 
 @app.route('/user-infos')
 def userInfos():
+   # Check connexion
    retCode = -1
    retMessage = "No active session"
-
-   if session.get("user_id") == None or session.get("username") == None:
+   if not checkSession():
       return returnJSON(retCode, retMessage)
+   # Check connexion
 
    response = {"user_id": session["user_id"], "username": session["username"]}
    retCode = 0
@@ -215,6 +268,17 @@ def test_tags():
    return returnJSON(0, "Success", music.getTags())
 
 
+def checkSession():
+   if session.get("user_id") == None or session.get("username") == None or session.get("token") == None:
+      return False
+   
+   user_id = session.get("user_id")
+   username = session.get("username")
+   token = session.get("token")
+   if db.checkSession(user_id, username, token):
+      return True
+
+   return False
 
 
 if __name__ == '__main__':

@@ -7,3 +7,4 @@ test.db
 music.db
 tmp
 flask_session/
+downloads/

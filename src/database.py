@@ -39,13 +39,13 @@ class DatabaseHandler:
             user_id         integer,\
             album_id        integer,\
             artist_id       integer,\
+            title           text,\
             genre           text,\
             track_number    integer,\
             track_total     integer,\
             disc_number     integer,\
             disc_total      integer,\
             comment         text,\
-            title           text,\
             music_year      integer\
         )")
 
@@ -71,7 +71,8 @@ class DatabaseHandler:
             user_id         integer,\
             artist_id       integer,\
             album_year      integer,\
-            cover_image     blob\
+            cover_image     blob,\
+            cover_image_mime text\
         )")
 
         cursorObj.execute("CREATE TABLE IF NOT EXISTS playlists(\
@@ -83,7 +84,7 @@ class DatabaseHandler:
         cursorObj.execute("CREATE TABLE IF NOT EXISTS musics_playlist(\
             id              integer PRIMARY KEY AUTOINCREMENT,\
             playlist_id     integer,\
-            music_id       integer\
+            music_id        integer\
         )")
 
         self.con.commit()
@@ -125,6 +126,19 @@ class DatabaseHandler:
         row = cursorObj.fetchall()
         return row
 
+    def checkSession(self, user_id, username, token):
+        cursorObj = self.con.cursor()
+        cursorObj.execute("SELECT * FROM users WHERE id = ? AND username = ? LIMIT 1", (user_id, username))
+
+        row = cursorObj.fetchall()
+        if len(row) < 1:
+            return False
+        else:
+            user_token = row[0][2]
+            if user_token != token:
+                return False
+        return True
+
     def getUsers(self):
         cursorObj = self.con.cursor()
         cursorObj.execute("SELECT * FROM users")
@@ -158,21 +172,34 @@ class DatabaseHandler:
     """
     musics function
     """
-    def getMusic(self, id):
+    def getMusicForUser(self, music_id, user_id):
+        response = {}
         cursorObj = self.con.cursor()
-        cursorObj.execute("SELECT * FROM musics WHERE id = ?", (id))
+        cursorObj.execute("SELECT * FROM musics WHERE id = ? AND user_id = ? LIMIT 1", (music_id, user_id))
 
         row = cursorObj.fetchall()
+        if len(row) > 0:
+            row = row[0]
+            response = {"music_id": row[0], "filename": row[1], "path": row[2], "extension": row[3], "album_id": row[5], 
+                "artist_id": row[6], "title": row[7], "genre": row[8], "track_number": row[9], "track_total": row[10],
+                "disk_number": row[11], "disk_total": row[12], "music_year": row[14]}
 
-        return row
+        return response
     
-    def getMusics(self):
+    def getMusicsForUser(self, user_id):
+        response = []
         cursorObj = self.con.cursor()
-        cursorObj.execute("SELECT * FROM musics")
+        cursorObj.execute("SELECT * FROM musics WHERE user_id = ?", (user_id, ))
 
-        row = cursorObj.fetchall()
+        rows = cursorObj.fetchall()
+        if len(rows) > 0:
+            for row in rows:
+                response.append({"music_id": row[0], "filename": row[1], "path": row[2], "extension": row[3], "album_id": row[5], 
+                "artist_id": row[6], "title": row[7], "genre": row[8], "track_number": row[9], "track_total": row[10],
+                "disk_number": row[11], "disk_total": row[12], "music_year": row[14]})
 
-        return row
+
+        return response
 
 
     def getArtist(self, artist):
@@ -199,8 +226,8 @@ class DatabaseHandler:
     def getAlbum(self, album, user_id, artist_id = None, date = None):
         cursorObj = self.con.cursor()
 
-        if isinstance(album, int) and isinstance(artist_id, None) and isinstance(date, None):
-            cursorObj.execute("SELECT * FROM albums WHERE id = ? AND user_id = ?", (artist_id, user_id))
+        if isinstance(album, int) and isinstance(user_id, int):
+            cursorObj.execute("SELECT * FROM albums WHERE id = ? AND user_id = ?", (album, user_id))
         elif isinstance(album, str):
             cursorObj.execute("SELECT * FROM albums WHERE name = ? AND artist_id = ? AND album_year = ?", (album, artist_id, date))
 
@@ -235,14 +262,14 @@ class DatabaseHandler:
         
         return artistID
 
-    def addAlbumToUser(self, name, artist_id, date, image, user_id):
+    def addAlbumToUser(self, name, artist_id, date, image, image_mime, user_id):
         if len(name) > 0 and len(artist_id) > 0:
             album = self.getAlbum(name, user_id, artist_id, date)
             if len(album) > 0:
                 albumID = album[0][0]
             else:
                 cursorObj = self.con.cursor()
-                cursorObj.execute("INSERT INTO albums(name, user_id, artist_id, album_year, cover_image) VALUES(?, ?, ?, ?, ?)", (name, user_id, artist_id, date, image))
+                cursorObj.execute("INSERT INTO albums(name, user_id, artist_id, album_year, cover_image, cover_image_mime) VALUES(?, ?, ?, ?, ?, ?)", (name, user_id, artist_id, date, image, image_mime))
                 self.con.commit()
                 album = self.getAlbum(name, user_id, artist_id, date)
                 if len(album) > 0:
@@ -261,6 +288,7 @@ class DatabaseHandler:
             return -1, "Music not found"
 
         tags = music.getTags()
+        picture_mime, picture_data = music.getPicture()
 
         # Check album artist
         albumArtistID = self.addArtistToUser(tags["albumartist"], None, user_id)
@@ -269,14 +297,14 @@ class DatabaseHandler:
         artistID = self.addArtistToUser(tags["artist"], None, user_id)
 
         # Check album
-        albumID = self.addAlbumToUser(tags["album"], tags["albumartist"], tags["date"], None, user_id)
+        albumID = self.addAlbumToUser(tags["album"], tags["albumartist"], tags["date"], picture_data, picture_mime, user_id)
 
         cursorObj = self.con.cursor()
         cursorObj.execute("INSERT INTO musics\
-            (filename, path, extension, user_id, album_id, artist_id, genre, track_number, track_total, disc_number, disc_total, comment, title, music_year) \
+            (filename, path, extension, user_id, album_id, artist_id, title, genre, track_number, track_total, disc_number, disc_total, comment, music_year) \
             VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (filename, music_path, music.fileType, user_id, albumID, artistID, tags["genre"], tags["tracknumber"], tags["tracktotal"], tags["discnumber"], tags["disctotal"],
-            "", tags["title"], tags["date"]))
+            (filename, music_path, music.fileType, user_id, albumID, artistID, tags["title"], tags["genre"], tags["tracknumber"], tags["tracktotal"],
+            tags["discnumber"], tags["disctotal"], "", tags["date"]))
         self.con.commit()
 
     def addMusicsToUser(self, musics_path, user_id):

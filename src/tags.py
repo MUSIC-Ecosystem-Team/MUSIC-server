@@ -21,6 +21,17 @@ class MusicFileHandler:
     def OK(self):
         return self.fileType != ""
 
+    def getPicture(self):
+        """ Switch to get picture from the file """
+        if self.fileType == "mp3":
+            for tag in self.musicFile.tags:
+                if isinstance(self.musicFile.tags[tag], mutagen.id3.APIC):
+                    return self.musicFile.tags[tag].mime, self.musicFile.tags[tag].data
+        elif self.fileType == "flac":
+            return None, None
+
+        return None, None
+
     def getTags(self):
         """ Switch to get tags from the file """
         if self.fileType == "mp3":
@@ -61,19 +72,3 @@ class MusicFileHandler:
             tags[tag[0].lower()] = tag[1]
         return tags
 
-
-
-""" with open("cover", "wb") as cover:
-    #cover.write(musicTags.get("APIC:").data)
-    print(musicTags.get("APIC:").mime) """
-
-
-# [('artist', 'Von Kaiser'), ('title', 'Wavelengths'), ('isrc', 'QZAMM1800206'), ('tracknumber', '2'), ('discnumber', '1'), ('tracktotal', '13'), ('disctotal', '1'), ('album', 'Ghosts of Miami'), ('genre', 'New Wave; Retrowave; Synthpop; Synthwave'), ('date', '2020'), ('label', 'Von Kaiser Music'), ('albumartist', 'Von Kaiser'), ('upc', '193339260365')]
-
-# {'TIT2': TIT2(encoding=<Encoding.UTF16: 1>, text=["Hangin' On You"]), 'TPE1': TPE1(encoding=<Encoding.UTF16: 1>, text=['Nena']), 'TPE2': TPE2(encoding=<Encoding.UTF16: 1>, text=['Nena']), 'TALB': TALB(encoding=<Encoding.UTF16: 1>, text=['99 Luftballons']), 'TRCK': TRCK(encoding=<Encoding.UTF16: 1>, text=['3/0']), 'TPOS': TPOS(encoding=<Encoding.UTF16: 1>, text=['1/0']), 'TCON': TCON(encoding=<Encoding.UTF16: 1>, text=['Pop']), 'APIC:': APIC(encoding=<Encoding.LATIN1: 0>, mime='image/jpeg', type=<PictureType.COVER_FRONT: 3>, desc='', data=b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x0
-
-""" <class 'mutagen.id3.TPE2'> ['Nena']
-<class 'mutagen.id3.TALB'> ['99 Luftballons']
-<class 'mutagen.id3.TRCK'> ['4/0']
-<class 'mutagen.id3.TPOS'> ['1/0']
-<class 'mutagen.id3.TCON'> ['Pop'] """
