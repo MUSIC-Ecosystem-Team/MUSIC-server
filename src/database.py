@@ -297,5 +297,3 @@ class DatabaseHandler:
     def addMusicsToUser(self, musics_path, user_id):
         for music in musics_path:
             self.addMusicToUser(music, user_id)
-
-dbHelper = DatabaseHandler("music.db")

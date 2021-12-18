@@ -6,6 +6,7 @@ import json
 from tags import MusicFileHandler
 from database import DatabaseHandler
 from utils import returnJSON
+from flask_cors import CORS
 
 # Normalize file names from uploads
 from unicodedata import normalize
@@ -15,24 +16,11 @@ from os import path
 from io import BytesIO
 
 app = Flask(__name__)
+CORS(app)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
-db = DatabaseHandler("music.db")
-
-@app.route('/set/<name>')
-def base(name):
-   session["name"] = name
-   
-   return "Something strange.. "
-
-@app.route('/')
-def base_redirect():
-   if not session.get("name"):
-      return "hey"
-   else:
-      return session.get("name")
-   
+db = DatabaseHandler("music.db")   
 
 @app.route('/database-informations')
 def database_informations():
@@ -48,11 +36,6 @@ def database_informations():
       retMessage = "Success"
 
    return returnJSON(retCode, retMessage, content)
-
-@app.route('/test-send')
-def test_send():
-   return send_file("musics/04 Just a Dream.mp3")
-
 
 """
 Musics
@@ -242,8 +225,13 @@ def test_tags():
 
 def checkAuth():
    token = request.headers.get('x-access-token')
+   tokenGet = request.args.get("x-access-token")
 
-   if isinstance(token, type(None)) or token == "":
+   if not isinstance(token, type(None)) and token != "":
+      pass
+   elif not isinstance(tokenGet, type(None)) and tokenGet != "":
+      token = tokenGet
+   else:
       return False, 0, ""
    
    user = db.checkToken(token)
