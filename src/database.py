@@ -181,25 +181,27 @@ class DatabaseHandler:
         rows = cursorObj.fetchall()
         if len(rows) > 0:
             for row in rows:
-                response.append({"music_id": row[0], "filename": row[1], "path": row[2], "extension": row[3], "album_id": row[5], 
-                "artist_id": row[6], "title": row[7], "genre": row[8], "track_number": row[9], "track_total": row[10],
+                response.append({"music_id": row[0], "filename": row[1], "path": row[2], "extension": row[3], "album": self.getAlbumForUser(row[5], user_id), 
+                "artist_id": self.getArtistForUser(row[6], user_id), "title": row[7], "genre": row[8], "track_number": row[9], "track_total": row[10],
                 "disk_number": row[11], "disk_total": row[12], "music_year": row[14]})
-
 
         return response
 
-
-    def getArtist(self, artist):
+    def getArtistForUser(self, artist, user_id):
+        response = {}
         cursorObj = self.con.cursor()
 
         if isinstance(artist, int):
-            cursorObj.execute("SELECT * FROM artists WHERE id = ?", (artist, ))
+            cursorObj.execute("SELECT * FROM artists WHERE id = ? AND user_id = ?", (artist, user_id))
         elif isinstance(artist, str):
-            cursorObj.execute("SELECT * FROM artists WHERE name = ?", (artist, ))
+            cursorObj.execute("SELECT * FROM artists WHERE name = ? AND user_id = ?", (artist, user_id))
 
         row = cursorObj.fetchall()
+        if len(row) > 0:
+            row = row[0]
+            response = {"artist_id": row[0], "name": row[1], "artist_picture": ""}
 
-        return row
+        return response
     
     def getArtists(self):
         cursorObj = self.con.cursor()
@@ -210,7 +212,8 @@ class DatabaseHandler:
         return row
 
 
-    def getAlbum(self, album, user_id, artist_id = None, date = None):
+    def getAlbumForUser(self, album, user_id, artist_id = None, date = None):
+        response = {}
         cursorObj = self.con.cursor()
 
         if isinstance(album, int) and isinstance(user_id, int):
@@ -219,29 +222,49 @@ class DatabaseHandler:
             cursorObj.execute("SELECT * FROM albums WHERE name = ? AND artist_id = ? AND album_year = ?", (album, artist_id, date))
 
         row = cursorObj.fetchall()
+        if len(row) > 0:
+            row = row[0]
+            response = {"album_id": row[0], "name": row[1], "artist": self.getArtistForUser(row[3], user_id), "date": row[4], "album_picture": "/get-album-picture/" + str(row[0]), "album_picture_mime": row[6]}
 
-        return row
-    
-    def getAlbums(self):
+        return response
+
+    def getAlbumPictureForUser(self, album_id, user_id):
+        response = {}
         cursorObj = self.con.cursor()
-        cursorObj.execute("SELECT * FROM albums")
+
+        cursorObj.execute("SELECT * FROM albums WHERE id = ? AND user_id = ?", (album_id, user_id))
 
         row = cursorObj.fetchall()
+        if len(row) > 0:
+            row = row[0]
+            response = {"album_picture": row[5], "album_picture_mime": row[6]}
 
-        return row
+        return response
+    
+    def getAlbumsForUser(self, user_id):
+        response = []
+        cursorObj = self.con.cursor()
+        cursorObj.execute("SELECT * FROM albums WHERE user_id = ?", (user_id, ))
+
+        rows = cursorObj.fetchall()
+        if len(rows) > 0:
+            for row in rows:
+                response.append({"album_id": row[0], "name": row[1], "artist": self.getArtistForUser(row[3], user_id), "date": row[4], "album_picture": "", "album_picture_mime": row[6]})
+
+        return response
 
     def addArtistToUser(self, name, image, user_id):
         if len(name) > 0:
-            artist = self.getArtist(name)
-            if len(artist) > 0:
-                artistID = artist[0][0]
+            artist = self.getArtistForUser(name, user_id)
+            if artist != {}:
+                artistID = artist["artist_id"]
             else:
                 cursorObj = self.con.cursor()
                 cursorObj.execute("INSERT INTO artists(name, user_id, artist_image) VALUES(?, ?, ?)", (name, user_id, image))
                 self.con.commit()
-                artist = self.getArtist(name)
-                if len(artist) > 0:
-                    artistID = artist[0][0]
+                artist = self.getArtistForUser(name, user_id)
+                if artist != {}:
+                    artistID = artist["artist_id"]
                 else:
                     artistID = 0
         else:
@@ -251,16 +274,16 @@ class DatabaseHandler:
 
     def addAlbumToUser(self, name, artist_id, date, image, image_mime, user_id):
         if len(name) > 0 and len(artist_id) > 0:
-            album = self.getAlbum(name, user_id, artist_id, date)
-            if len(album) > 0:
-                albumID = album[0][0]
+            album = self.getAlbumForUser(name, user_id, artist_id, date)
+            if album != {}:
+                albumID = album["album_id"]
             else:
                 cursorObj = self.con.cursor()
                 cursorObj.execute("INSERT INTO albums(name, user_id, artist_id, album_year, cover_image, cover_image_mime) VALUES(?, ?, ?, ?, ?, ?)", (name, user_id, artist_id, date, image, image_mime))
                 self.con.commit()
                 album = self.getAlbum(name, user_id, artist_id, date)
-                if len(album) > 0:
-                    albumID = album[0][0]
+                if album != {}:
+                    albumID = album["album_id"]
                 else:
                     albumID = 0
         else:

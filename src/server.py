@@ -72,6 +72,19 @@ def getMusics():
    response = db.getMusicsForUser(user_id)
    return returnJSON("0", "Success", response)
 
+@app.route('/get-albums')
+def getAlbums():
+   # Check connexion
+   retCode = -1
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   response = db.getAlbumsForUser(user_id)
+   return returnJSON("0", "Success", response)
+
 @app.route('/get-music/<int:music_id>')
 def getMusic(music_id:int):
    # Check connexion
@@ -83,6 +96,19 @@ def getMusic(music_id:int):
    # Check connexion
 
    response = db.getMusicForUser(music_id, user_id)
+   return returnJSON("0", "Success", response)
+
+@app.route('/get-album/<int:album_id>')
+def getAlbum(album_id:int):
+   # Check connexion
+   retCode = -1
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   response = db.getAlbumForUser(album_id, user_id)
    return returnJSON("0", "Success", response)
 
 @app.route('/get-music-picture/<int:music_id>')
@@ -99,12 +125,45 @@ def getMusicPicture(music_id:int):
    if response == {}:
       return returnJSON(-1, "Music does not exist")
    else:
-      album = db.getAlbum(response["album_id"], user_id)
+      picture = db.getAlbumPictureForUser(response["album_id"], user_id)
+      if picture != {}:
+         return send_file(
+            BytesIO(picture["album_picture"]),
+            mimetype=picture["album_picture_mime"],
+            as_attachment=False,
+            download_name="cover")
+      else:
+         with open("ressources/music_default.png", "br") as f:
+            return send_file(
+               BytesIO(f.read()),
+               mimetype="image/png",
+               as_attachment=False,
+               download_name="cover")
+
+@app.route('/get-album-picture/<int:album_id>')
+def getAlbumPicture(album_id:int):
+   # Check connexion
+   retCode = -1
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   picture = db.getAlbumPictureForUser(album_id, user_id)
+   if picture != {} and picture["album_picture"] != "":
       return send_file(
-         BytesIO(album[0][5]),
-         mimetype=album[0][6],
+         BytesIO(picture["album_picture"]),
+         mimetype=picture["album_picture_mime"],
          as_attachment=False,
          download_name="cover")
+   else:
+      with open("ressources/music_default.png", "br") as f:
+         return send_file(
+            BytesIO(f.read()),
+            mimetype="image/png",
+            as_attachment=False,
+            download_name="cover")
 
 @app.route('/get-music-file/<int:music_id>')
 def getMusicFile(music_id:int):
