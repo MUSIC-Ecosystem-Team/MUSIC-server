@@ -20,8 +20,18 @@ CORS(app)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
-db = DatabaseHandler("music.db")   
+db = DatabaseHandler("music.db")
 
+"""
+Database: implemented
+
+/database-informations GET
+
+
+Database: not implemented
+
+/update-database-informations POST
+"""
 @app.route('/database-informations')
 def database_informations():
    retCode = -1
@@ -38,26 +48,26 @@ def database_informations():
    return returnJSON(retCode, retMessage, content)
 
 """
-Musics
-
+Musics: implemented
 
 /get-musics GET
-/get-music/<id> GET
-/get-music-file/<id> GET
+/get-albums GET
+/get-music/<music_id> GET
+/get-album/<album_id> GET
+/get-music-picture/<music_id> GET (not recommanded to use, see /get-album-picture instead)
+/get-album-picture/<album_id> GET
+/get-music-file/<music_id> GET
+/upload-music POST {music: music file to upload}
+
+
+Musics: not implemented
 
 /get-artists GET
-/get-artist/<id> GET
-
-/get-albums GET
-/get-album/<id> GET
-
-/get-playlists GET
-/get-playlist/<id> GET
-
-
-/create-playlist POST
-
-/upload-music POST
+/get-artist/<artist_id> GET
+/update-music POST
+/update-album POST
+/update-artist POST
+/remove-music/<music_id> GET
 """
 @app.route('/get-musics')
 def getMusics():
@@ -185,8 +195,8 @@ def getMusicFile(music_id:int):
 def getArtists(id:int):
    return ""
 
-@app.route('/get-artist/<int:id>')
-def getArtist(id:int):
+@app.route('/get-artist/<int:artist_id>')
+def getArtist(artist_id:int):
    return ""
 
 @app.route('/upload-music', methods = ["POST"])
@@ -219,12 +229,30 @@ def uploadMusic():
    return returnJSON("0", "Music saved as \"" + filename + "\"", music.getTags())
 
 """
-Session
+Playlists: implemented
 
-/register POST
-/get-token POST
-/logout GET
+
+Playlists: not implemented
+
+/create-playlist POST
+/get-playlists GET
+/get-playlist/<playlist_id> GET
+/update-playlist/ POST
+/remove-playlist/<playlist_id> GET
+"""
+
+"""
+Users: implemented
+
+/register POST {username: username to register, password: password}
+/get-token POST {username: username of user, password: password of user}
 /user-infos GET
+
+
+Users: not implemented
+
+/update-profile POST
+/update-password POST
 """
 
 @app.route('/register', methods = ['POST'])
@@ -268,19 +296,6 @@ def userInfos():
    retMessage = "Success"
    
    return returnJSON(retCode, retMessage, response)
-
-
-
-
-@app.route('/test-music')
-def test_tags():
-   music = MusicFileHandler("musics/02. Von Kaiser - Wavelengths.flac")
-
-   if not music.OK():
-      return returnJSON(-1, "Error getting tags")
-
-   return returnJSON(0, "Success", music.getTags())
-
 
 def checkAuth():
    token = request.headers.get('x-access-token')
