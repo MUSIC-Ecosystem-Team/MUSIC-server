@@ -126,7 +126,7 @@ def getMusicPicture(music_id:int):
       return returnJSON(-1, "Music does not exist")
    else:
       picture = db.getAlbumPictureForUser(response["album_id"], user_id)
-      if picture != {}:
+      if picture != {} and picture["album_picture"] != None:
          return send_file(
             BytesIO(picture["album_picture"]),
             mimetype=picture["album_picture_mime"],
@@ -151,7 +151,7 @@ def getAlbumPicture(album_id:int):
    # Check connexion
 
    picture = db.getAlbumPictureForUser(album_id, user_id)
-   if picture != {} and picture["album_picture"] != "":
+   if picture != {} and picture["album_picture"] != None:
       return send_file(
          BytesIO(picture["album_picture"]),
          mimetype=picture["album_picture_mime"],

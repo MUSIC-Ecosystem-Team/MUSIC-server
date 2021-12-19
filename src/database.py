@@ -169,7 +169,7 @@ class DatabaseHandler:
             row = row[0]
             response = {"music_id": row[0], "filename": row[1], "path": row[2], "extension": row[3], "album_id": row[5], 
                 "artist_id": row[6], "title": row[7], "genre": row[8], "track_number": row[9], "track_total": row[10],
-                "disk_number": row[11], "disk_total": row[12], "music_year": row[14]}
+                "disk_number": row[11], "disk_total": row[12], "date": row[14]}
 
         return response
     
@@ -182,8 +182,8 @@ class DatabaseHandler:
         if len(rows) > 0:
             for row in rows:
                 response.append({"music_id": row[0], "filename": row[1], "path": row[2], "extension": row[3], "album": self.getAlbumForUser(row[5], user_id), 
-                "artist_id": self.getArtistForUser(row[6], user_id), "title": row[7], "genre": row[8], "track_number": row[9], "track_total": row[10],
-                "disk_number": row[11], "disk_total": row[12], "music_year": row[14]})
+                "artist": self.getArtistForUser(row[6], user_id), "title": row[7], "genre": row[8], "track_number": row[9], "track_total": row[10],
+                "disk_number": row[11], "disk_total": row[12], "date": row[14]})
 
         return response
 
@@ -281,7 +281,7 @@ class DatabaseHandler:
                 cursorObj = self.con.cursor()
                 cursorObj.execute("INSERT INTO albums(name, user_id, artist_id, album_year, cover_image, cover_image_mime) VALUES(?, ?, ?, ?, ?, ?)", (name, user_id, artist_id, date, image, image_mime))
                 self.con.commit()
-                album = self.getAlbum(name, user_id, artist_id, date)
+                album = self.getAlbumForUser(name, user_id, artist_id, date)
                 if album != {}:
                     albumID = album["album_id"]
                 else:
