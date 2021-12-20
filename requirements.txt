@@ -1,0 +1,4 @@
+mutagen
+flask
+Flask-Session
+Flask-Cors

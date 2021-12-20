@@ -138,9 +138,10 @@ class DatabaseHandler:
             return -1, "Username already exist"
         else:
             cursorObj = self.con.cursor()
-            cursorObj.execute("INSERT INTO users(username, password_hash, token, library_revision, creation_date) VALUES(?, ?, ?, ?, ?)", (username, hashlib.sha512(password.encode()).hexdigest(), secrets.token_urlsafe(48), 1, time.time()))
+            token = secrets.token_urlsafe(48)
+            cursorObj.execute("INSERT INTO users(username, password_hash, token, library_revision, creation_date) VALUES(?, ?, ?, ?, ?)", (username, hashlib.sha512(password.encode()).hexdigest(), token, 1, time.time()))
             self.con.commit()
-            return 0, "Accound successfuly created"
+            return 0, "Accound successfuly created", token
     
     def getUserToken(self, username, password):
         password_hash = hashlib.sha512(password.encode()).hexdigest()
