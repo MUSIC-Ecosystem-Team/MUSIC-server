@@ -10,7 +10,7 @@ from flask_cors import CORS
 
 # Normalize file names from uploads
 from unicodedata import normalize
-from os import path
+from os import path, makedirs
 
 # send music pictures
 from io import BytesIO
@@ -52,8 +52,10 @@ Musics: implemented
 
 /get-musics GET
 /get-albums GET
+/get-artists GET
 /get-music/<music_id> GET
 /get-album/<album_id> GET
+/get-artist/<artist_id> GET
 /get-music-picture/<music_id> GET (not recommanded to use, see /get-album-picture instead)
 /get-album-picture/<album_id> GET
 /get-music-file/<music_id> GET
@@ -62,8 +64,6 @@ Musics: implemented
 
 Musics: not implemented
 
-/get-artists GET
-/get-artist/<artist_id> GET
 /update-music POST
 /update-album POST
 /update-artist POST
@@ -80,7 +80,7 @@ def getMusics():
    # Check connexion
 
    response = db.getMusicsForUser(user_id)
-   return returnJSON("0", "Success", response)
+   return returnJSON(0, "Success", response)
 
 @app.route('/get-albums')
 def getAlbums():
@@ -93,7 +93,7 @@ def getAlbums():
    # Check connexion
 
    response = db.getAlbumsForUser(user_id)
-   return returnJSON("0", "Success", response)
+   return returnJSON(0, "Success", response)
 
 @app.route('/get-music/<int:music_id>')
 def getMusic(music_id:int):
@@ -119,6 +119,13 @@ def getAlbum(album_id:int):
    # Check connexion
 
    response = db.getAlbumForUser(album_id, user_id)
+   if response == {}:
+      retCode = -1
+      retMessage = "Album not found"
+   else:
+      retCode = 0
+      retMessage = "Success"
+   return returnJSON(retCode, retMessage, response)
    return returnJSON("0", "Success", response)
 
 @app.route('/get-music-picture/<int:music_id>')
@@ -192,12 +199,36 @@ def getMusicFile(music_id:int):
       return send_file(response["path"])
 
 @app.route('/get-artists')
-def getArtists(id:int):
-   return ""
+def getArtists():
+   # Check connexion
+   retCode = -1
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   response = db.getArtistsForUser(user_id)
+   return returnJSON(0, "Success", response)
 
 @app.route('/get-artist/<int:artist_id>')
 def getArtist(artist_id:int):
-   return ""
+   # Check connexion
+   retCode = -1
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   response = db.getArtistForUser(artist_id, user_id)
+   if response == {}:
+      retCode = -1
+      retMessage = "Artist not found"
+   else:
+      retCode = 0
+      retMessage = "Success"
+   return returnJSON(retCode, retMessage, response)
 
 @app.route('/upload-music', methods = ["POST"])
 def uploadMusic():
@@ -216,6 +247,7 @@ def uploadMusic():
       if sep:
          filename = filename.replace(sep, ' ')
 
+   makedirs("downloads", exist_ok=True)
    saving_path = "downloads/" + filename
    f.save(saving_path)
 
@@ -226,7 +258,7 @@ def uploadMusic():
    
    db.addMusicToUser(filename, saving_path, user_id)
 
-   return returnJSON("0", "Music saved as \"" + filename + "\"", music.getTags())
+   return returnJSON(0, "Music saved as \"" + filename + "\"", music.getTags())
 
 """
 Playlists: implemented

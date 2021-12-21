@@ -204,23 +204,14 @@ class DatabaseHandler:
 
         return response
     
-    def getArtists(self):
-        cursorObj = self.con.cursor()
-        cursorObj.execute("SELECT * FROM artists")
-
-        row = cursorObj.fetchall()
-
-        return row
-
-
     def getAlbumForUser(self, album, user_id, artist_id = None, date = None):
         response = {}
         cursorObj = self.con.cursor()
 
-        if isinstance(album, int) and isinstance(user_id, int):
+        if isinstance(album, int):
             cursorObj.execute("SELECT * FROM albums WHERE id = ? AND user_id = ?", (album, user_id))
         elif isinstance(album, str):
-            cursorObj.execute("SELECT * FROM albums WHERE name = ? AND artist_id = ? AND album_year = ?", (album, artist_id, date))
+            cursorObj.execute("SELECT * FROM albums WHERE name = ? AND artist_id = ? AND user_id = ? AND album_year = ?", (album, artist_id, user_id, date))
 
         row = cursorObj.fetchall()
         if len(row) > 0:
@@ -251,6 +242,34 @@ class DatabaseHandler:
         if len(rows) > 0:
             for row in rows:
                 response.append({"album_id": row[0], "name": row[1], "artist": self.getArtistForUser(row[3], user_id), "date": row[4], "album_picture": "", "album_picture_mime": row[6]})
+
+        return response
+
+    def getArtistsForUser(self, user_id):
+        response = []
+        cursorObj = self.con.cursor()
+        cursorObj.execute("SELECT * FROM artists WHERE user_id = ?", (user_id, ))
+
+        rows = cursorObj.fetchall()
+        if len(rows) > 0:
+            for row in rows:
+                response.append({"artist_id": row[0], "name": row[1], "artist_picture": ""})
+
+        return response
+
+    def getArtistForUser(self, artist, user_id, name = None):
+        response = {}
+        cursorObj = self.con.cursor()
+
+        if isinstance(artist, int):
+            cursorObj.execute("SELECT * FROM artists WHERE id = ? AND user_id = ?", (artist, user_id))
+        elif isinstance(artist, str):
+            cursorObj.execute("SELECT * FROM artists WHERE name = ? AND user_id = ?", (artist, user_id))
+
+        row = cursorObj.fetchall()
+        if len(row) > 0:
+            row = row[0]
+            response = {"artist_id": row[0], "name": row[1], "artist_picture": ""}
 
         return response
 
@@ -302,6 +321,7 @@ class DatabaseHandler:
         picture_mime, picture_data = music.getPicture()
 
         # Check album artist
+        # TODO add checks if album artist don't exist
         albumArtistID = self.addArtistToUser(tags["albumartist"], None, user_id)
 
         # Check artist
