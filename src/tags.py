@@ -81,31 +81,30 @@ class MusicFileHandler:
     def getM4aTags(self):
         tags = {"title": "", "artist": "", "albumartist": "", "album": "", "title": "", "tracknumber": "", "tracktotal": "", "discnumber": "", "disctotal": "", "date": "", "genre": ""}
         for tag in self.musicFile.tags:
-            if tag.lower() != "covr":
-                if tag.lower() == "©nam":
-                    tags["title"] = self.musicFile.tags[tag][0]
-                elif tag.lower() == "aart":
-                    tags["albumartist"] = self.musicFile.tags[tag][0]
-                elif tag.lower() == "©art":
-                    tags["artist"] = self.musicFile.tags[tag][0]
-                elif tag.lower() == "©alb":
-                    tags["album"] = self.musicFile.tags[tag][0]
-                elif tag.lower() == "©day":
-                    if len(self.musicFile.tags[tag][0]) > 3:
-                        tags["date"] = self.musicFile.tags[tag][0]
-                elif tag.lower() == "trkn":
-                    if len(self.musicFile.tags[tag][0]) == 2:
-                        tags["tracknumber"] = self.musicFile.tags[tag][0][0]
-                        tags["tracktotal"] = self.musicFile.tags[tag][0][1]
-                    elif len(self.musicFile.tags[tag][0]) == 1:
-                        tags["tracknumber"] = self.musicFile.tags[tag][0][0]
-                elif tag.lower() == "disk":
-                    if len(self.musicFile.tags[tag][0]) == 2:
-                        tags["discnumber"] = self.musicFile.tags[tag][0][0]
-                        tags["disctotal"] = self.musicFile.tags[tag][0][1]
-                    elif len(self.musicFile.tags[tag][0]) == 1:
-                        tags["discnumber"] = self.musicFile.tags[tag][0][0]
-                elif tag.lower() == "©gen":
-                    tags["genre"] = self.musicFile.tags[tag][0]
+            if tag.lower() == "©nam":
+                tags["title"] = self.musicFile.tags[tag][0]
+            elif tag.lower() == "aart":
+                tags["albumartist"] = self.musicFile.tags[tag][0]
+            elif tag.lower() == "©art":
+                tags["artist"] = self.musicFile.tags[tag][0]
+            elif tag.lower() == "©alb":
+                tags["album"] = self.musicFile.tags[tag][0]
+            elif tag.lower() == "©day":
+                if len(self.musicFile.tags[tag][0]) > 3:
+                    tags["date"] = self.musicFile.tags[tag][0]
+            elif tag.lower() == "trkn":
+                if len(self.musicFile.tags[tag][0]) == 2:
+                    tags["tracknumber"] = self.musicFile.tags[tag][0][0]
+                    tags["tracktotal"] = self.musicFile.tags[tag][0][1]
+                elif len(self.musicFile.tags[tag][0]) == 1:
+                    tags["tracknumber"] = self.musicFile.tags[tag][0][0]
+            elif tag.lower() == "disk":
+                if len(self.musicFile.tags[tag][0]) == 2:
+                    tags["discnumber"] = self.musicFile.tags[tag][0][0]
+                    tags["disctotal"] = self.musicFile.tags[tag][0][1]
+                elif len(self.musicFile.tags[tag][0]) == 1:
+                    tags["discnumber"] = self.musicFile.tags[tag][0][0]
+            elif tag.lower() == "©gen":
+                tags["genre"] = self.musicFile.tags[tag][0]
         return tags
 

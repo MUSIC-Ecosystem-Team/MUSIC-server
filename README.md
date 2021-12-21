@@ -4,24 +4,27 @@
 [![img last release](https://img.shields.io/twitter/follow/Ooggule.svg?style=social)](https://twitter.com/Ooggule)
 
 # MUSIC!
-Music server and music players for personal use.   
-Listen your music everywhere without using a single Mb of storage.
+Music server and music players for personal use and self-hosted experience.   
+Listen your music everywhere without using a single MB of storage.
 
 ![logo](music.png)
 
 ## Current development progression
-Linux MUSIC! server: 50%   
-Android player: 30%   
-PC player: 5%   
-Web player: currently developed by [MeatReed](https://github.com/MeatReed)   
+MUSIC! server: Most of the mandatory endpoints have been done.    
+MUSIC! Android player: research stage.   
+MUSIC! Web player: currently developed by MeatReed [here](https://github.com/MUSIC-Ecosystem-Team/MUSIC-node-website).   
 
-For now, it will support mp3, flac and ogg formats. Maybe i will add more in the future. Also, everything is WIP for the moment.
+For now, it will support mp3, flac, ogg and m4a formats. Maybe i will add more in the future. Also, everything is WIP for the moment.
 
 To view the server API progress, feel free to visit [the dedicated page](diagrams/server/api_doc.md).
 
-## Build
+## Usage
 
-Dependencies :
+You need at least `python3` and `pip`:   
 ```bash
-sudo apt install build-essential libtag1-dev libsqlite3-dev libz-dev
+git clone https://github.com/MUSIC-Ecosystem-Team/MUSIC-server && cd MUSIC-server
+python3 -m pip install -r requirements.txt
+cd src
+python3 ./server.py
 ```
+*On WSL, you may need to use `sudo` with the last command*
