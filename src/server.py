@@ -68,6 +68,8 @@ Musics: not implemented
 /update-album POST
 /update-artist POST
 /remove-music/<music_id> GET
+/remove-album/<album_id> GET
+/remove-artist/<artist_id> GET
 """
 @app.route('/get-musics')
 def getMusics():
@@ -93,6 +95,19 @@ def getAlbums():
    # Check connexion
 
    response = db.getAlbumsForUser(user_id)
+   return returnJSON(0, "Success", response)
+
+@app.route('/get-playlists')
+def getPlaylists():
+   # Check connexion
+   retCode = -1
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   response = db.getPlaylistsForUser(user_id)
    return returnJSON(0, "Success", response)
 
 @app.route('/get-music/<int:music_id>')
@@ -122,6 +137,26 @@ def getAlbum(album_id:int):
    if response == {}:
       retCode = -1
       retMessage = "Album not found"
+   else:
+      retCode = 0
+      retMessage = "Success"
+   return returnJSON(retCode, retMessage, response)
+   return returnJSON("0", "Success", response)
+
+@app.route('/get-playlist/<int:playlist_id>')
+def getPlaylist(playlist_id:int):
+   # Check connexion
+   retCode = -1
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   response = db.getPlaylistForUser(playlist_id, user_id)
+   if response == {}:
+      retCode = -1
+      retMessage = "Playlist not found"
    else:
       retCode = 0
       retMessage = "Success"
@@ -297,8 +332,8 @@ def register():
    if username == None or password == None:
       return returnJSON(-1, "Missing parameters")
 
-   retCode, retMessage = db.createUser(username, password)
-   return returnJSON(retCode, retMessage)
+   retCode, retMessage, token = db.createUser(username, password)
+   return returnJSON(retCode, retMessage, token)
 
 @app.route('/get-token', methods = ['POST'])
 def getToken():

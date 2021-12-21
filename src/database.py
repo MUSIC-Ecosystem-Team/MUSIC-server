@@ -77,11 +77,12 @@ class DatabaseHandler:
 
         cursorObj.execute("CREATE TABLE IF NOT EXISTS playlists(\
             id              integer PRIMARY KEY AUTOINCREMENT,\
+            user_id         integer,\
             name            text,\
-            user_id         integer\
+            description     text\
         )")
 
-        cursorObj.execute("CREATE TABLE IF NOT EXISTS musics_playlist(\
+        cursorObj.execute("CREATE TABLE IF NOT EXISTS playlists_musics(\
             id              integer PRIMARY KEY AUTOINCREMENT,\
             playlist_id     integer,\
             music_id        integer\
@@ -135,13 +136,13 @@ class DatabaseHandler:
 
     def createUser(self, username, password):
         if len(self.getUser(username)) > 0:
-            return -1, "Username already exist"
+            return -1, "Username already exist", None
         else:
             cursorObj = self.con.cursor()
             token = secrets.token_urlsafe(48)
             cursorObj.execute("INSERT INTO users(username, password_hash, token, library_revision, creation_date) VALUES(?, ?, ?, ?, ?)", (username, hashlib.sha512(password.encode()).hexdigest(), token, 1, time.time()))
             self.con.commit()
-            return 0, "Accound successfuly created", token
+            return 0, "Accound successfuly created", {"token": token}
     
     def getUserToken(self, username, password):
         password_hash = hashlib.sha512(password.encode()).hexdigest()
@@ -158,7 +159,7 @@ class DatabaseHandler:
         self.con.commit()
 
     """
-    musics function
+    musics functions
     """
     def getMusicForUser(self, music_id, user_id):
         response = {}
@@ -168,8 +169,8 @@ class DatabaseHandler:
         row = cursorObj.fetchall()
         if len(row) > 0:
             row = row[0]
-            response = {"music_id": row[0], "filename": row[1], "path": row[2], "extension": row[3], "album_id": row[5], 
-                "artist_id": row[6], "title": row[7], "genre": row[8], "track_number": row[9], "track_total": row[10],
+            response = {"music_id": row[0], "filename": row[1], "path": row[2], "extension": row[3], "album": self.getAlbumForUser(row[5], user_id), 
+                "artist": self.getArtistForUser(row[6], user_id), "title": row[7], "genre": row[8], "track_number": row[9], "track_total": row[10],
                 "disk_number": row[11], "disk_total": row[12], "date": row[14]}
 
         return response
@@ -201,6 +202,8 @@ class DatabaseHandler:
         if len(row) > 0:
             row = row[0]
             response = {"artist_id": row[0], "name": row[1], "artist_picture": ""}
+        else:
+            response = {"artist_id": 0, "name": "Various artists", "artist_picture": ""}
 
         return response
     
@@ -293,7 +296,7 @@ class DatabaseHandler:
         return artistID
 
     def addAlbumToUser(self, name, artist_id, date, image, image_mime, user_id):
-        if len(name) > 0 and len(artist_id) > 0:
+        if len(name) > 0:
             album = self.getAlbumForUser(name, user_id, artist_id, date)
             if album != {}:
                 albumID = album["album_id"]
@@ -328,7 +331,7 @@ class DatabaseHandler:
         artistID = self.addArtistToUser(tags["artist"], None, user_id)
 
         # Check album
-        albumID = self.addAlbumToUser(tags["album"], tags["albumartist"], tags["date"], picture_data, picture_mime, user_id)
+        albumID = self.addAlbumToUser(tags["album"], albumArtistID, tags["date"], picture_data, picture_mime, user_id)
 
         cursorObj = self.con.cursor()
         cursorObj.execute("INSERT INTO musics\
@@ -341,3 +344,53 @@ class DatabaseHandler:
     def addMusicsToUser(self, musics_path, user_id):
         for music in musics_path:
             self.addMusicToUser(music, user_id)
+
+    """
+    playlists functions
+    """
+    def getPlaylistsForUser(self, user_id):
+        response = []
+        cursorObj = self.con.cursor()
+        cursorObj.execute("SELECT id, name, description\
+                            FROM playlists\
+                            WHERE user_id = ?", (user_id, ))
+
+        rows = cursorObj.fetchall()
+        if len(rows) > 0:
+            for row in rows:
+                response.append({"artist_id": row[0], "name": row[1], "description": row[2]})
+
+        return response
+
+    def getPlaylistForUser(self, playlist_id, user_id):
+        response = {}
+
+        # get playlist informations
+        cursorObj = self.con.cursor()
+        cursorObj.execute("SELECT id, name, description\
+                            FROM playlists\
+                            WHERE id = ? AND user_id = ?", (playlist_id, user_id))
+
+        rows = cursorObj.fetchall()
+        if len(rows) > 0:
+            for row in rows:
+                response = {"playlist_id": row[0], "name": row[1], "description": row[2]}
+        else:
+            return reponse
+
+        # get playlist musics
+        print(playlist_id)
+        print(user_id)
+        cursorObj = self.con.cursor()
+        cursorObj.execute("SELECT pm.music_id\
+                            FROM playlists_musics pm\
+                            INNER JOIN playlists p on p.id = pm.playlist_id\
+                            WHERE pm.playlist_id = ? AND p.user_id = ?", (playlist_id, user_id))
+
+        rows = cursorObj.fetchall()
+        if len(row) > 0:
+            response["musics"] = []
+            for row in rows:
+                response["musics"].append(self.getMusicForUser(row[0], user_id))
+
+        return response

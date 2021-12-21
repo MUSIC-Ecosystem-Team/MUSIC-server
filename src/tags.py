@@ -107,4 +107,3 @@ class MusicFileHandler:
             elif tag.lower() == "©gen":
                 tags["genre"] = self.musicFile.tags[tag][0]
         return tags
-
