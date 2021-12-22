@@ -1,2 +1,0 @@
-g++ .\TagsHandler.cpp .\tagTest.cpp -lavformat -lavcodec -lavutil  -lz -lm -lpthread -o tagTest
-
