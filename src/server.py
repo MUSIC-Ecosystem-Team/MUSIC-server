@@ -97,19 +97,6 @@ def getAlbums():
    response = db.getAlbumsForUser(user_id)
    return returnJSON(0, "Success", response)
 
-@app.route('/get-playlists')
-def getPlaylists():
-   # Check connexion
-   retCode = -1
-   retMessage = "Wrong token or x-access-token header not set"
-   retCode, user_id, username = checkAuth()
-   if not retCode:
-      return returnJSON(retCode, retMessage)
-   # Check connexion
-
-   response = db.getPlaylistsForUser(user_id)
-   return returnJSON(0, "Success", response)
-
 @app.route('/get-music/<int:music_id>')
 def getMusic(music_id:int):
    # Check connexion
@@ -141,27 +128,6 @@ def getAlbum(album_id:int):
       retCode = 0
       retMessage = "Success"
    return returnJSON(retCode, retMessage, response)
-   return returnJSON("0", "Success", response)
-
-@app.route('/get-playlist/<int:playlist_id>')
-def getPlaylist(playlist_id:int):
-   # Check connexion
-   retCode = -1
-   retMessage = "Wrong token or x-access-token header not set"
-   retCode, user_id, username = checkAuth()
-   if not retCode:
-      return returnJSON(retCode, retMessage)
-   # Check connexion
-
-   response = db.getPlaylistForUser(playlist_id, user_id)
-   if response == {}:
-      retCode = -1
-      retMessage = "Playlist not found"
-   else:
-      retCode = 0
-      retMessage = "Success"
-   return returnJSON(retCode, retMessage, response)
-   return returnJSON("0", "Success", response)
 
 @app.route('/get-music-picture/<int:music_id>')
 def getMusicPicture(music_id:int):
@@ -298,15 +264,48 @@ def uploadMusic():
 """
 Playlists: implemented
 
+/get-playlists GET
+/get-playlist/<playlist_id> GET
+
 
 Playlists: not implemented
 
 /create-playlist POST
-/get-playlists GET
-/get-playlist/<playlist_id> GET
 /update-playlist/ POST
 /remove-playlist/<playlist_id> GET
 """
+
+@app.route('/get-playlists')
+def getPlaylists():
+   # Check connexion
+   retCode = -1
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   response = db.getPlaylistsForUser(user_id)
+   return returnJSON(0, "Success", response)
+
+@app.route('/get-playlist/<int:playlist_id>')
+def getPlaylist(playlist_id:int):
+   # Check connexion
+   retCode = -1
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   response = db.getPlaylistForUser(playlist_id, user_id)
+   if response == {}:
+      retCode = -1
+      retMessage = "Playlist not found"
+   else:
+      retCode = 0
+      retMessage = "Success"
+   return returnJSON(retCode, retMessage, response)
 
 """
 Users: implemented
@@ -318,8 +317,8 @@ Users: implemented
 
 Users: not implemented
 
-/update-profile POST
-/update-password POST
+/update-profile POST {old_password: for security reason, new_username: can be empty, new_password: can be empty}
+/generate-new-token POST {password: for security reason}
 """
 
 @app.route('/register', methods = ['POST'])

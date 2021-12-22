@@ -376,7 +376,7 @@ class DatabaseHandler:
             for row in rows:
                 response = {"playlist_id": row[0], "name": row[1], "description": row[2]}
         else:
-            return reponse
+            return response
 
         # get playlist musics
         print(playlist_id)
