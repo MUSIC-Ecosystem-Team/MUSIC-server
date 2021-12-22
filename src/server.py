@@ -272,6 +272,8 @@ Playlists: not implemented
 
 /create-playlist POST
 /update-playlist/ POST
+/add-music-to-playlist/<playlist_id>/<music_id> GET
+/add-musics-to-playlist/<playlist_id> POST {musics: music IDs separated by ";" (ex. "2;23;10;38")}
 /remove-playlist/<playlist_id> GET
 """
 
