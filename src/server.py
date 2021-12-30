@@ -271,9 +271,11 @@ Playlists: implemented
 
 Playlists: not implemented
 
-/update-playlist/ POST
+/update-playlist/<playlist_id> POST
 /add-music-to-playlist/<playlist_id>/<music_id> GET
 /add-musics-to-playlist/<playlist_id> POST {musics: music IDs separated by ";" (ex. "2;23;10;38")}
+/remove-music-from-playlist/<playlist_id>/<music_id> GET
+/remove-musics-from-playlist/<playlist_id> POST {musics: music IDs separated by ";" (ex. "2;23;10;38")}
 /remove-playlist/<playlist_id> GET
 """
 
@@ -328,6 +330,31 @@ def CreatePlaylist():
 
    retCode, retMessage, id = db.CreatePlaylistForUser(name, description, user_id)
    return returnJSON(retCode, retMessage, id)
+
+@app.route('/update-playlist/<int:playlist_id>', methods = ['POST'])
+def UpdatePlaylist(playlist_id:int):
+   # Check connexion
+   retCode = -1
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   retMessage = "Failed to update playlist"
+   name = request.form.get("name")
+   description = request.form.get("description")
+
+   if name == None or description == None:
+      return returnJSON(-1, "Missing parameters")
+
+   if name == "":
+      return returnJSON(-1, "Playlist name can't be empty")
+
+   retCode, retMessage = db.UpdatePlaylistForUser(playlist_id, name, description, user_id)
+
+   return returnJSON(retCode, retMessage, {})
+
 
 """
 Users: implemented
@@ -402,6 +429,10 @@ def checkAuth():
 
    return False, 0, ""
 
+@app.errorhandler(404)
+def page_not_found(error):
+   return {"code": -404, "message": "This endpoint does not exist."}, 404
+
 if __name__ == '__main__':
    app.debug = True
-   app.run("127.0.0.1", 80)
+   app.run("0.0.0.0", 80)

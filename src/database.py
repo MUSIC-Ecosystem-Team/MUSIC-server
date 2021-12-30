@@ -361,6 +361,17 @@ class DatabaseHandler:
             self.con.commit()
             return 0, "Playlist successfuly created", {"id": inserted_id}
 
+    def UpdatePlaylistForUser(self, playlist_id, name, description, user_id):
+        if len(self.getPlaylistForUser(playlist_id, user_id)) < 1:
+            return -1, "The playlist does not exist"
+        else:
+            cursorObj = self.con.cursor()
+            token = secrets.token_urlsafe(48)
+            cursorObj.execute("UPDATE playlists SET name = ?, description = ? WHERE id = ? AND user_id = ?", (name, description, playlist_id, user_id))
+
+            self.con.commit()
+            return 0, "Playlist successfuly updated"
+
     def getPlaylistsForUser(self, user_id):
         response = []
         cursorObj = self.con.cursor()
