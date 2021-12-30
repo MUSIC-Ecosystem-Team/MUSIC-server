@@ -348,6 +348,31 @@ class DatabaseHandler:
     """
     playlists functions
     """
+
+    def CreatePlaylistForUser(self, name, description, user_id):
+        response = []
+        cursorObj = self.con.cursor()
+        cursorObj.execute("SELECT id, name, description\
+                            FROM playlists\
+                            WHERE user_id = ?", (user_id, ))
+
+        rows = cursorObj.fetchall()
+        if len(rows) > 0:
+            for row in rows:
+                response.append({"artist_id": row[0], "name": row[1], "description": row[2]})
+
+        return response
+
+        def createUser(self, username, password):
+        if len(self.getUser(username)) > 0:
+            return -1, "Username already exist", None
+        else:
+            cursorObj = self.con.cursor()
+            token = secrets.token_urlsafe(48)
+            cursorObj.execute("INSERT INTO users(username, password_hash, token, library_revision, creation_date) VALUES(?, ?, ?, ?, ?)", (username, hashlib.sha512(password.encode()).hexdigest(), token, 1, time.time()))
+            self.con.commit()
+            return 0, "Accound successfuly created", {"token": token}
+
     def getPlaylistsForUser(self, user_id):
         response = []
         cursorObj = self.con.cursor()

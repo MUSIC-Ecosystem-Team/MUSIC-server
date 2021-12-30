@@ -1,6 +1,6 @@
-[![img release](https://img.shields.io/github/commit-activity/m/MUSIC-Ecosystem-Team/MUSIC-exclamation-mark.svg?sanitize=true&color=blue)](#)
-[![img last commit](https://img.shields.io/github/last-commit/MUSIC-Ecosystem-Team/MUSIC-exclamation-mark.svg)](#)
-[![img last release](https://img.shields.io/github/release/MUSIC-Ecosystem-Team/MUSIC-exclamation-mark.svg?color=red)](#)
+[![img release](https://img.shields.io/github/commit-activity/m/MUSIC-Ecosystem-Team/MUSIC-server.svg?sanitize=true&color=blue)](#)
+[![img last commit](https://img.shields.io/github/last-commit/MUSIC-Ecosystem-Team/MUSIC-server.svg)](#)
+[![img last release](https://img.shields.io/github/release/MUSIC-Ecosystem-Team/MUSIC-server.svg?color=red)](#)
 [![img last release](https://img.shields.io/twitter/follow/Ooggle_.svg?style=social)](https://twitter.com/Ooggule)
 
 # MUSIC!
