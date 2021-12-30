@@ -354,7 +354,6 @@ class DatabaseHandler:
             return -1, "A playlist with the same name already exist", {}
         else:
             cursorObj = self.con.cursor()
-            token = secrets.token_urlsafe(48)
             cursorObj.execute("INSERT INTO playlists(user_id, name, description) VALUES(?, ?, ?)", (user_id, name, description))
             inserted_id = cursorObj.lastrowid
 
@@ -366,11 +365,40 @@ class DatabaseHandler:
             return -1, "The playlist does not exist"
         else:
             cursorObj = self.con.cursor()
-            token = secrets.token_urlsafe(48)
             cursorObj.execute("UPDATE playlists SET name = ?, description = ? WHERE id = ? AND user_id = ?", (name, description, playlist_id, user_id))
 
             self.con.commit()
             return 0, "Playlist successfuly updated"
+
+    def addMusicsToPlaylistForUser(self, playlist_id, musics, user_id):
+        total = len(musics)
+        if len(self.getPlaylistForUser(playlist_id, user_id)) < 1:
+            return -1, "The playlist does not exist", {"added": f"0/{total}"}
+        else:
+            total_good = 0
+            for music_id in musics:
+                ret = self.addMusicToPlaylistForUser(playlist_id, music_id, user_id)
+                if ret = 0:
+                    total_good+= 1
+            return 0, "Musics successfuly added", {"added": f"{total_good}/{total}"}
+
+    def _def addMusicToPlaylistForUser(self, playlist_id, music_id, user_id):
+        if len(self.getPlaylistForUser(playlist_id, user_id)) < 1:
+            return -1
+        else:
+            cursorObj = self.con.cursor()
+            cursorObj.execute("SELECT id FROM playlists_musics\
+                                WHERE playlist_id = ? AND music_id = ?", (playlist_id, music_id))
+
+            rows = cursorObj.fetchall()
+            if len(rows) > 0:
+                return -1
+            else:
+                cursorObj = self.con.cursor()
+                cursorObj.execute("INSERT INTO playlists_musics(playlist_id, music_id) VALUES(?, ?)", (playlist_id, music_id))
+                self.con.commit()
+                return 0
+
 
     def getPlaylistsForUser(self, user_id):
         response = []

@@ -267,13 +267,13 @@ Playlists: implemented
 /get-playlists GET
 /get-playlist/<playlist_id> GET
 /create-playlist POST {name: playlist name, description: playlist description}
+/update-playlist/<playlist_id> POST
+/add-musics-to-playlist/<playlist_id> POST {musics: music IDs separated by ";" (ex. "2;23;10;38")}
 
 
 Playlists: not implemented
 
-/update-playlist/<playlist_id> POST
 /add-music-to-playlist/<playlist_id>/<music_id> GET
-/add-musics-to-playlist/<playlist_id> POST {musics: music IDs separated by ";" (ex. "2;23;10;38")}
 /remove-music-from-playlist/<playlist_id>/<music_id> GET
 /remove-musics-from-playlist/<playlist_id> POST {musics: music IDs separated by ";" (ex. "2;23;10;38")}
 /remove-playlist/<playlist_id> GET
@@ -354,6 +354,28 @@ def UpdatePlaylist(playlist_id:int):
    retCode, retMessage = db.UpdatePlaylistForUser(playlist_id, name, description, user_id)
 
    return returnJSON(retCode, retMessage, {})
+
+@app.route('/add-musics-to-playlist/<int:playlist_id>', methods = ['POST'])
+def AddMusicsToPlaylist(playlist_id:int):
+   # Check connexion
+   retCode = -1
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   retMessage = "Failed adding musics to playlist"
+   musics = request.form.get("musics")
+
+   if musics == None or musics == "":
+      return returnJSON(-1, "Missing parameters")
+
+   musics = musics.split(";")
+
+   retCode, retMessage, added = db.addMusicsToPlaylistForUser(playlist_id, musics, user_id)
+
+   return returnJSON(retCode, retMessage, added)
 
 
 """
