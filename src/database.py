@@ -350,28 +350,16 @@ class DatabaseHandler:
     """
 
     def CreatePlaylistForUser(self, name, description, user_id):
-        response = []
-        cursorObj = self.con.cursor()
-        cursorObj.execute("SELECT id, name, description\
-                            FROM playlists\
-                            WHERE user_id = ?", (user_id, ))
-
-        rows = cursorObj.fetchall()
-        if len(rows) > 0:
-            for row in rows:
-                response.append({"artist_id": row[0], "name": row[1], "description": row[2]})
-
-        return response
-
-        def createUser(self, username, password):
-        if len(self.getUser(username)) > 0:
-            return -1, "Username already exist", None
+        if len(self.getPlaylistForUser(name, user_id)) > 0:
+            return -1, "A playlist with the same name already exist", {}
         else:
             cursorObj = self.con.cursor()
             token = secrets.token_urlsafe(48)
-            cursorObj.execute("INSERT INTO users(username, password_hash, token, library_revision, creation_date) VALUES(?, ?, ?, ?, ?)", (username, hashlib.sha512(password.encode()).hexdigest(), token, 1, time.time()))
+            cursorObj.execute("INSERT INTO playlists(user_id, name, description) VALUES(?, ?, ?)", (user_id, name, description))
+            inserted_id = cursorObj.lastrowid
+
             self.con.commit()
-            return 0, "Accound successfuly created", {"token": token}
+            return 0, "Playlist successfuly created", {"id": inserted_id}
 
     def getPlaylistsForUser(self, user_id):
         response = []
@@ -383,34 +371,37 @@ class DatabaseHandler:
         rows = cursorObj.fetchall()
         if len(rows) > 0:
             for row in rows:
-                response.append({"artist_id": row[0], "name": row[1], "description": row[2]})
+                response.append(self.getPlaylistForUser(row[0], user_id))
 
         return response
 
-    def getPlaylistForUser(self, playlist_id, user_id):
+    def getPlaylistForUser(self, playlist, user_id):
         response = {}
 
         # get playlist informations
         cursorObj = self.con.cursor()
-        cursorObj.execute("SELECT id, name, description\
-                            FROM playlists\
-                            WHERE id = ? AND user_id = ?", (playlist_id, user_id))
+        if isinstance(playlist, str):
+            cursorObj.execute("SELECT id, name, description\
+                                FROM playlists\
+                                WHERE name = ? AND user_id = ?", (playlist, user_id))
+        elif isinstance(playlist, int):
+            cursorObj.execute("SELECT id, name, description\
+                                FROM playlists\
+                                WHERE id = ? AND user_id = ?", (playlist, user_id))
 
         rows = cursorObj.fetchall()
         if len(rows) > 0:
-            for row in rows:
-                response = {"playlist_id": row[0], "name": row[1], "description": row[2]}
+            row = rows[0]
+            response = {"playlist_id": row[0], "name": row[1], "description": row[2]}
         else:
             return response
 
         # get playlist musics
-        print(playlist_id)
-        print(user_id)
         cursorObj = self.con.cursor()
         cursorObj.execute("SELECT pm.music_id\
                             FROM playlists_musics pm\
                             INNER JOIN playlists p on p.id = pm.playlist_id\
-                            WHERE pm.playlist_id = ? AND p.user_id = ?", (playlist_id, user_id))
+                            WHERE pm.playlist_id = ? AND p.user_id = ?", (playlist, user_id))
 
         rows = cursorObj.fetchall()
         if len(row) > 0:

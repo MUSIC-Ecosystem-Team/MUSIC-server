@@ -66,10 +66,10 @@ Musics: not implemented
 
 /update-music POST
 /update-album POST
-/update-artist POST
-/remove-music/<music_id> GET
-/remove-album/<album_id> GET
-/remove-artist/<artist_id> GET
+/update-artist POST (maybe)
+/remove-music/<music_id> POST
+/remove-album/<album_id> POST
+/remove-artist/<artist_id> POST
 """
 @app.route('/get-musics')
 def getMusics():
@@ -266,11 +266,11 @@ Playlists: implemented
 
 /get-playlists GET
 /get-playlist/<playlist_id> GET
+/create-playlist POST {name: playlist name, description: playlist description}
 
 
 Playlists: not implemented
 
-/create-playlist POST
 /update-playlist/ POST
 /add-music-to-playlist/<playlist_id>/<music_id> GET
 /add-musics-to-playlist/<playlist_id> POST {musics: music IDs separated by ";" (ex. "2;23;10;38")}
@@ -308,6 +308,26 @@ def getPlaylist(playlist_id:int):
       retCode = 0
       retMessage = "Success"
    return returnJSON(retCode, retMessage, response)
+
+@app.route('/create-playlist', methods = ['POST'])
+def CreatePlaylist():
+   # Check connexion
+   retCode = -1
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   retMessage = "Failed to create playlist"
+   name = request.form.get("name")
+   description = request.form.get("description")
+
+   if name == None or description == None:
+      return returnJSON(-1, "Missing parameters")
+
+   retCode, retMessage, id = db.CreatePlaylistForUser(name, description, user_id)
+   return returnJSON(retCode, retMessage, id)
 
 """
 Users: implemented
