@@ -349,7 +349,7 @@ class DatabaseHandler:
     playlists functions
     """
 
-    def CreatePlaylistForUser(self, name, description, user_id):
+    def createPlaylistForUser(self, name, description, user_id):
         if len(self.getPlaylistForUser(name, user_id)) > 0:
             return -1, "A playlist with the same name already exist", {}
         else:
@@ -360,7 +360,7 @@ class DatabaseHandler:
             self.con.commit()
             return 0, "Playlist successfuly created", {"id": inserted_id}
 
-    def UpdatePlaylistForUser(self, playlist_id, name, description, user_id):
+    def updatePlaylistForUser(self, playlist_id, name, description, user_id):
         if len(self.getPlaylistForUser(playlist_id, user_id)) < 1:
             return -1, "The playlist does not exist"
         else:
@@ -409,7 +409,7 @@ class DatabaseHandler:
                     self.con.commit()
                     return 0, "Musics successfuly added", {"added": "1/1"}
 
-    def RemovePlaylistForUser(self, playlist_id, user_id):
+    def removePlaylistForUser(self, playlist_id, user_id):
         if len(self.getPlaylistForUser(playlist_id, user_id)) < 1:
             return -1, "The playlist does not exist"
         else:
@@ -422,7 +422,7 @@ class DatabaseHandler:
             self.con.commit()
             return 0, "Playlist removed successfuly"
 
-    def RemoveMusicsFromPlaylistForUser(self, playlist_id, musics, user_id):
+    def removeMusicsFromPlaylistForUser(self, playlist_id, musics, user_id):
         total = 0
         if len(self.getPlaylistForUser(playlist_id, user_id)) < 1:
             return -1, "The playlist does not exist", {"added": f"0/{total}"}
@@ -431,12 +431,12 @@ class DatabaseHandler:
             for music_id in musics:
                 if music_id != '':
                     total+= 1
-                    ret, __ = self.RemoveMusicFromPlaylistForUser(playlist_id, music_id, user_id)
+                    ret, __ = self.removeMusicFromPlaylistForUser(playlist_id, music_id, user_id)
                     if ret == 0:
                         total_good+= 1
             return 0, "Musics successfuly removed", {"removed": f"{total_good}/{total}"}
 
-    def RemoveMusicFromPlaylistForUser(self, playlist_id, music_id, user_id):
+    def removeMusicFromPlaylistForUser(self, playlist_id, music_id, user_id):
         if len(self.getPlaylistForUser(playlist_id, user_id)) < 1:
             return -1, "The playlist does not exist"
         else:

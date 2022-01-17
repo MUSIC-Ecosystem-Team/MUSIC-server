@@ -1,7 +1,7 @@
 [![img release](https://img.shields.io/github/commit-activity/m/MUSIC-Ecosystem-Team/MUSIC-server.svg?sanitize=true&color=blue)](#)
 [![img last commit](https://img.shields.io/github/last-commit/MUSIC-Ecosystem-Team/MUSIC-server.svg)](#)
 [![img last release](https://img.shields.io/github/release/MUSIC-Ecosystem-Team/MUSIC-server.svg?color=red)](#)
-[![img last release](https://img.shields.io/twitter/follow/Ooggle_.svg?style=social)](https://twitter.com/Ooggule)
+[![img last release](https://img.shields.io/twitter/follow/Ooggle_.svg?style=social)](https://twitter.com/Ooggle_)
 
 # MUSIC!
 Music server and music players for personal use and self-hosted experience.   

@@ -26,14 +26,16 @@ db = DatabaseHandler("music.db")
 Database: implemented
 
 /database-informations GET
+/update-database-informations POST {name: new database name, description: new database description}
 
 
 Database: not implemented
 
-/update-database-informations POST
+Nothing \o/
+
 """
 @app.route('/database-informations')
-def database_informations():
+def databaseInformations():
    retCode = -1
    retMessage = "Failed to get database informations"
 
@@ -46,6 +48,34 @@ def database_informations():
       retMessage = "Success"
 
    return returnJSON(retCode, retMessage, content)
+
+@app.route('/update-database-informations', methods = ["POST"])
+def updateDatabaseInformations():
+   # Check connexion
+   retCode = -1
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+   retCode = -1
+   retMessage = "Missing parameters"
+
+   name = request.form.get("name")
+   description = request.form.get("description")
+   print(name)
+   print(description)
+
+   if isinstance(name, type(None)) or name == "":
+      return returnJSON(retCode, retMessage)
+   elif isinstance(description, type(None)) and description == "":
+      return returnJSON(retCode, retMessage)
+   else:
+      retCode = 0
+      retMessage = "Database informations updated successfully"
+      db.setDatabaseInformations(name, description)
+
+   return returnJSON(retCode, retMessage)
 
 """
 Musics: implemented
@@ -330,7 +360,7 @@ def CreatePlaylist():
    if name == None or description == None:
       return returnJSON(-1, "Missing parameters")
 
-   retCode, retMessage, id = db.CreatePlaylistForUser(name, description, user_id)
+   retCode, retMessage, id = db.createPlaylistForUser(name, description, user_id)
    return returnJSON(retCode, retMessage, id)
 
 @app.route('/update-playlist/<int:playlist_id>', methods = ['POST'])
@@ -353,7 +383,7 @@ def UpdatePlaylist(playlist_id:int):
    if name == "":
       return returnJSON(-1, "Playlist name can't be empty")
 
-   retCode, retMessage = db.UpdatePlaylistForUser(playlist_id, name, description, user_id)
+   retCode, retMessage = db.updatePlaylistForUser(playlist_id, name, description, user_id)
 
    return returnJSON(retCode, retMessage, {})
 
@@ -403,7 +433,7 @@ def RemovePlaylist(playlist_id:int):
       return returnJSON(retCode, retMessage)
    # Check connexion
 
-   retCode, retMessage = db.RemovePlaylistForUser(playlist_id, user_id)
+   retCode, retMessage = db.removePlaylistForUser(playlist_id, user_id)
 
    return returnJSON(retCode, retMessage)
 
@@ -425,7 +455,7 @@ def RemoveMusicsFromPlaylist(playlist_id:int):
 
    musics = musics.split(";")
 
-   retCode, retMessage, added = db.RemoveMusicsFromPlaylistForUser(playlist_id, musics, user_id)
+   retCode, retMessage, added = db.removeMusicsFromPlaylistForUser(playlist_id, musics, user_id)
 
    return returnJSON(retCode, retMessage, added)
 
@@ -439,7 +469,7 @@ def RemoveMusicFromPlaylist(playlist_id:int, music_id:int):
       return returnJSON(retCode, retMessage)
    # Check connexion
 
-   retCode, retMessage = db.RemoveMusicFromPlaylistForUser(playlist_id, music_id, user_id)
+   retCode, retMessage = db.removeMusicFromPlaylistForUser(playlist_id, music_id, user_id)
 
    return returnJSON(retCode, retMessage)
 
