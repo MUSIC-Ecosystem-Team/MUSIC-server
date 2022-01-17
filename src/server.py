@@ -269,14 +269,16 @@ Playlists: implemented
 /create-playlist POST {name: playlist name, description: playlist description}
 /update-playlist/<playlist_id> POST
 /add-musics-to-playlist/<playlist_id> POST {musics: music IDs separated by ";" (ex. "2;23;10;38")}
+/add-music-to-playlist/<playlist_id>/<music_id> GET
+/remove-playlist/<playlist_id> GET
+/remove-music-from-playlist/<playlist_id>/<music_id> GET
+/remove-musics-from-playlist/<playlist_id> POST {musics: music IDs separated by ";" (ex. "2;23;10;38")}
 
 
 Playlists: not implemented
 
-/add-music-to-playlist/<playlist_id>/<music_id> GET
-/remove-music-from-playlist/<playlist_id>/<music_id> GET
-/remove-musics-from-playlist/<playlist_id> POST {musics: music IDs separated by ";" (ex. "2;23;10;38")}
-/remove-playlist/<playlist_id> GET
+nothing \o/
+
 """
 
 @app.route('/get-playlists')
@@ -377,6 +379,69 @@ def AddMusicsToPlaylist(playlist_id:int):
 
    return returnJSON(retCode, retMessage, added)
 
+@app.route('/add-music-to-playlist/<int:playlist_id>/<int:music_id>')
+def AddMusicToPlaylist(playlist_id:int, music_id:int):
+   # Check connexion
+   retCode = -1
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   retCode, retMessage, added = db.addMusicToPlaylistForUser(playlist_id, music_id, user_id)
+
+   return returnJSON(retCode, retMessage, added)
+
+@app.route('/remove-playlist/<int:playlist_id>')
+def RemovePlaylist(playlist_id:int):
+   # Check connexion
+   retCode = -1
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   retCode, retMessage = db.RemovePlaylistForUser(playlist_id, user_id)
+
+   return returnJSON(retCode, retMessage)
+
+@app.route('/remove-musics-from-playlist/<int:playlist_id>', methods = ['POST'])
+def RemoveMusicsFromPlaylist(playlist_id:int):
+   # Check connexion
+   retCode = -1
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   retMessage = "Failed removing musics to playlist"
+   musics = request.form.get("musics")
+
+   if musics == None or musics == "":
+      return returnJSON(-1, "Missing parameters")
+
+   musics = musics.split(";")
+
+   retCode, retMessage, added = db.RemoveMusicsFromPlaylistForUser(playlist_id, musics, user_id)
+
+   return returnJSON(retCode, retMessage, added)
+
+@app.route('/remove-music-from-playlist/<int:playlist_id>/<int:music_id>')
+def RemoveMusicFromPlaylist(playlist_id:int, music_id:int):
+   # Check connexion
+   retCode = -1
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if not retCode:
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   retCode, retMessage = db.RemoveMusicFromPlaylistForUser(playlist_id, music_id, user_id)
+
+   return returnJSON(retCode, retMessage)
 
 """
 Users: implemented

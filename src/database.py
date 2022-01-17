@@ -371,20 +371,22 @@ class DatabaseHandler:
             return 0, "Playlist successfuly updated"
 
     def addMusicsToPlaylistForUser(self, playlist_id, musics, user_id):
-        total = len(musics)
+        total = 0
         if len(self.getPlaylistForUser(playlist_id, user_id)) < 1:
             return -1, "The playlist does not exist", {"added": f"0/{total}"}
         else:
             total_good = 0
             for music_id in musics:
-                ret = self.addMusicToPlaylistForUser(playlist_id, music_id, user_id)
-                if ret = 0:
-                    total_good+= 1
+                if music_id != '':
+                    total+= 1
+                    ret, __, __ = self.addMusicToPlaylistForUser(playlist_id, music_id, user_id)
+                    if ret == 0:
+                        total_good+= 1
             return 0, "Musics successfuly added", {"added": f"{total_good}/{total}"}
 
-    def _def addMusicToPlaylistForUser(self, playlist_id, music_id, user_id):
+    def addMusicToPlaylistForUser(self, playlist_id, music_id, user_id):
         if len(self.getPlaylistForUser(playlist_id, user_id)) < 1:
-            return -1
+            return -1, "The playlist does not exist", {"added": "0/1"}
         else:
             cursorObj = self.con.cursor()
             cursorObj.execute("SELECT id FROM playlists_musics\
@@ -392,12 +394,68 @@ class DatabaseHandler:
 
             rows = cursorObj.fetchall()
             if len(rows) > 0:
-                return -1
+                return -1, "The music is already in the playlist", {"added": "0/1"}
             else:
                 cursorObj = self.con.cursor()
-                cursorObj.execute("INSERT INTO playlists_musics(playlist_id, music_id) VALUES(?, ?)", (playlist_id, music_id))
+                cursorObj.execute("SELECT id FROM musics\
+                                    WHERE id = ?", (music_id, ))
+
+                rows = cursorObj.fetchall()
+                if len(rows) < 1:
+                    return -1, "The music does not exist", {"added": "0/1"}
+                else:
+                    cursorObj = self.con.cursor()
+                    cursorObj.execute("INSERT INTO playlists_musics(playlist_id, music_id) VALUES(?, ?)", (playlist_id, music_id))
+                    self.con.commit()
+                    return 0, "Musics successfuly added", {"added": "1/1"}
+
+    def RemovePlaylistForUser(self, playlist_id, user_id):
+        if len(self.getPlaylistForUser(playlist_id, user_id)) < 1:
+            return -1, "The playlist does not exist"
+        else:
+            # Delete musics from playlist + playlist
+            cursorObj = self.con.cursor()
+            cursorObj.execute("DELETE FROM playlists_musics\
+                                WHERE playlist_id = ?", (playlist_id, ))
+            cursorObj.execute("DELETE FROM playlists\
+                                WHERE id = ?", (playlist_id, ))
+            self.con.commit()
+            return 0, "Playlist removed successfuly"
+
+    def RemoveMusicsFromPlaylistForUser(self, playlist_id, musics, user_id):
+        total = 0
+        if len(self.getPlaylistForUser(playlist_id, user_id)) < 1:
+            return -1, "The playlist does not exist", {"added": f"0/{total}"}
+        else:
+            total_good = 0
+            for music_id in musics:
+                if music_id != '':
+                    total+= 1
+                    ret, __ = self.RemoveMusicFromPlaylistForUser(playlist_id, music_id, user_id)
+                    if ret == 0:
+                        total_good+= 1
+            return 0, "Musics successfuly removed", {"removed": f"{total_good}/{total}"}
+
+    def RemoveMusicFromPlaylistForUser(self, playlist_id, music_id, user_id):
+        if len(self.getPlaylistForUser(playlist_id, user_id)) < 1:
+            return -1, "The playlist does not exist"
+        else:
+            # Check if music exists in playlist
+            cursorObj = self.con.cursor()
+            cursorObj.execute("SELECT id\
+                                FROM playlists_musics\
+                                WHERE playlist_id = ? AND music_id = ?", (playlist_id, music_id))
+
+            rows = cursorObj.fetchall()
+            if len(rows) < 1:
+                return -1, "The music is not in playlist"
+            else:
+                # Delete musics from playlist + playlist
+                cursorObj = self.con.cursor()
+                cursorObj.execute("DELETE FROM playlists_musics\
+                                    WHERE playlist_id = ? AND music_id = ?", (playlist_id, music_id))
                 self.con.commit()
-                return 0
+                return 0, "Music removed successfuly from playlist"
 
 
     def getPlaylistsForUser(self, user_id):
