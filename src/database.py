@@ -142,7 +142,7 @@ class DatabaseHandler:
             token = secrets.token_urlsafe(48)
             cursorObj.execute("INSERT INTO users(username, password_hash, token, library_revision, creation_date) VALUES(?, ?, ?, ?, ?)", (username, hashlib.sha512(password.encode()).hexdigest(), token, 1, time.time()))
             self.con.commit()
-            return 0, "Accound successfuly created", {"token": token}
+            return 0, "Accound successfully created", {"token": token}
     
     def getUserToken(self, username, password):
         password_hash = hashlib.sha512(password.encode()).hexdigest()
@@ -358,7 +358,7 @@ class DatabaseHandler:
             inserted_id = cursorObj.lastrowid
 
             self.con.commit()
-            return 0, "Playlist successfuly created", {"id": inserted_id}
+            return 0, "Playlist successfully created", {"id": inserted_id}
 
     def updatePlaylistForUser(self, playlist_id, name, description, user_id):
         if len(self.getPlaylistForUser(playlist_id, user_id)) < 1:
@@ -368,7 +368,7 @@ class DatabaseHandler:
             cursorObj.execute("UPDATE playlists SET name = ?, description = ? WHERE id = ? AND user_id = ?", (name, description, playlist_id, user_id))
 
             self.con.commit()
-            return 0, "Playlist successfuly updated"
+            return 0, "Playlist successfully updated"
 
     def addMusicsToPlaylistForUser(self, playlist_id, musics, user_id):
         total = 0
@@ -382,7 +382,7 @@ class DatabaseHandler:
                     ret, __, __ = self.addMusicToPlaylistForUser(playlist_id, music_id, user_id)
                     if ret == 0:
                         total_good+= 1
-            return 0, "Musics successfuly added", {"added": f"{total_good}/{total}"}
+            return 0, "Musics successfully added", {"added": f"{total_good}/{total}"}
 
     def addMusicToPlaylistForUser(self, playlist_id, music_id, user_id):
         if len(self.getPlaylistForUser(playlist_id, user_id)) < 1:
@@ -407,7 +407,7 @@ class DatabaseHandler:
                     cursorObj = self.con.cursor()
                     cursorObj.execute("INSERT INTO playlists_musics(playlist_id, music_id) VALUES(?, ?)", (playlist_id, music_id))
                     self.con.commit()
-                    return 0, "Musics successfuly added", {"added": "1/1"}
+                    return 0, "Musics successfully added", {"added": "1/1"}
 
     def removePlaylistForUser(self, playlist_id, user_id):
         if len(self.getPlaylistForUser(playlist_id, user_id)) < 1:
@@ -420,7 +420,7 @@ class DatabaseHandler:
             cursorObj.execute("DELETE FROM playlists\
                                 WHERE id = ?", (playlist_id, ))
             self.con.commit()
-            return 0, "Playlist removed successfuly"
+            return 0, "Playlist removed successfully"
 
     def removeMusicsFromPlaylistForUser(self, playlist_id, musics, user_id):
         total = 0
@@ -434,7 +434,7 @@ class DatabaseHandler:
                     ret, __ = self.removeMusicFromPlaylistForUser(playlist_id, music_id, user_id)
                     if ret == 0:
                         total_good+= 1
-            return 0, "Musics successfuly removed", {"removed": f"{total_good}/{total}"}
+            return 0, "Musics successfully removed", {"removed": f"{total_good}/{total}"}
 
     def removeMusicFromPlaylistForUser(self, playlist_id, music_id, user_id):
         if len(self.getPlaylistForUser(playlist_id, user_id)) < 1:
@@ -448,14 +448,14 @@ class DatabaseHandler:
 
             rows = cursorObj.fetchall()
             if len(rows) < 1:
-                return -1, "The music is not in playlist"
+                return -1, "The music is not in the playlist"
             else:
                 # Delete musics from playlist + playlist
                 cursorObj = self.con.cursor()
                 cursorObj.execute("DELETE FROM playlists_musics\
                                     WHERE playlist_id = ? AND music_id = ?", (playlist_id, music_id))
                 self.con.commit()
-                return 0, "Music removed successfuly from playlist"
+                return 0, "Music removed successfully from playlist"
 
 
     def getPlaylistsForUser(self, user_id):

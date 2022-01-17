@@ -297,7 +297,7 @@ Playlists: implemented
 /get-playlists GET
 /get-playlist/<playlist_id> GET
 /create-playlist POST {name: playlist name, description: playlist description}
-/update-playlist/<playlist_id> POST
+/update-playlist/<playlist_id> POST {name: new playlist name, description: new playlist description}
 /add-musics-to-playlist/<playlist_id> POST {musics: music IDs separated by ";" (ex. "2;23;10;38")}
 /add-music-to-playlist/<playlist_id>/<music_id> GET
 /remove-playlist/<playlist_id> GET
