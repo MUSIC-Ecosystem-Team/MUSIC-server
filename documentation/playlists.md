@@ -1,4 +1,4 @@
-[Back to home documentation](home_documentation.md)
+[Back to home documentation](home.md)
 
 # Playlists endpoints
 
@@ -323,4 +323,4 @@
 
 <br>
 
-[Back to home documentation](home_documentation.md)
+[Back to home documentation](home.md)

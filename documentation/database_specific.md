@@ -1,4 +1,4 @@
-[Back to home documentation](home_documentation.md)
+[Back to home documentation](home.md)
 
 # Database Specific endpoints
 
@@ -59,4 +59,4 @@
 
 <br>
 
-[Back to home documentation](home_documentation.md)
+[Back to home documentation](home.md)
