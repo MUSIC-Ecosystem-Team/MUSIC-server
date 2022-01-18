@@ -16,7 +16,7 @@ MUSIC! Web player: currently developed by MeatReed [here](https://github.com/MUS
 
 For now, it will support mp3, flac, ogg and m4a formats. Maybe i will add more in the future. Also, everything is WIP for the moment.
 
-To view the server API progress, feel free to visit [the dedicated page](diagrams/server/api_doc.md).
+To view the server API progress, feel free to visit [the dedicated page](https://github.com/MUSIC-Ecosystem-Team/MUSIC-server/wiki/).
 
 ## Usage
 
