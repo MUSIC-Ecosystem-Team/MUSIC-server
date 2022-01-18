@@ -103,11 +103,59 @@
 
 # POST /update-profile
 
-`!TODO`
+**Method** : `POST`
+
+**Auth required** : YES
+
+**Summary** : Used to retrieve the token linked to an account.
+
+**Parameters** :
+- `string` **password** : password of the account (for security reasons)
+- `string` **new_username** : new username (can be empty for unchanged)
+- `string` **new_password** : new password (can be empty for unchanged)
+
+## Example response with a good password
+
+```json
+{
+    "code": 0,
+    "message": "User updated successfully",
+    "response": {}
+}
+```
 
 # POST /generate-new-token
 
-`!TODO`
+**Method** : `POST`
+
+**Auth required** : YES
+
+**Summary** : Used to change the user token. The new generated token is sent back in response.
+
+**Parameters** :
+- `string` **password** : password of the account (for security reasons)
+
+## Example response
+
+```json
+{
+    "code": 0,
+    "message": "User token updated successfully",
+    "response": {
+        "token": "string" // Use this new token for requests
+    }
+}
+```
+
+## Example if the password is incorrect:
+
+```json
+{
+    "code": -1,
+    "message": "Password incorrect",
+    "response": {}
+}
+```
 
 <br>
 

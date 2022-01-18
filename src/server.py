@@ -7,6 +7,7 @@ from tags import MusicFileHandler
 from database import DatabaseHandler
 from utils import returnJSON
 from flask_cors import CORS
+import hashlib
 
 # Normalize file names from uploads
 from unicodedata import normalize
@@ -55,7 +56,7 @@ def updateDatabaseInformations():
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
    retCode = -1
@@ -107,7 +108,7 @@ def getMusics():
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
@@ -120,7 +121,7 @@ def getAlbums():
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
@@ -133,7 +134,7 @@ def getMusic(music_id:int):
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
@@ -146,7 +147,7 @@ def getAlbum(album_id:int):
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
@@ -165,7 +166,7 @@ def getMusicPicture(music_id:int):
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
@@ -194,7 +195,7 @@ def getAlbumPicture(album_id:int):
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
@@ -219,7 +220,7 @@ def getMusicFile(music_id:int):
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
@@ -235,7 +236,7 @@ def getArtists():
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
@@ -248,7 +249,7 @@ def getArtist(artist_id:int):
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
@@ -267,7 +268,7 @@ def uploadMusic():
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
@@ -317,7 +318,7 @@ def getPlaylists():
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
@@ -330,7 +331,7 @@ def getPlaylist(playlist_id:int):
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
@@ -349,7 +350,7 @@ def CreatePlaylist():
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
@@ -369,7 +370,7 @@ def UpdatePlaylist(playlist_id:int):
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
@@ -393,7 +394,7 @@ def AddMusicsToPlaylist(playlist_id:int):
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
@@ -415,7 +416,7 @@ def AddMusicToPlaylist(playlist_id:int, music_id:int):
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
@@ -429,7 +430,7 @@ def RemovePlaylist(playlist_id:int):
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
@@ -443,7 +444,7 @@ def RemoveMusicsFromPlaylist(playlist_id:int):
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
@@ -465,7 +466,7 @@ def RemoveMusicFromPlaylist(playlist_id:int, music_id:int):
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
@@ -479,12 +480,13 @@ Users: implemented
 /register POST {username: username to register, password: password}
 /get-token POST {username: username of user, password: password of user}
 /user-infos GET
+/update-profile POST {password: for security reason, new_username: can be empty, new_password: can be empty}
+/generate-new-token POST {password: for security reason}
 
 
 Users: not implemented
 
-/update-profile POST {old_password: for security reason, new_username: can be empty, new_password: can be empty}
-/generate-new-token POST {password: for security reason}
+Nothing \o/
 """
 
 @app.route('/register', methods = ['POST'])
@@ -519,7 +521,7 @@ def userInfos():
    retCode = -1
    retMessage = "Wrong token or x-access-token header not set"
    retCode, user_id, username = checkAuth()
-   if not retCode:
+   if retCode == -1:
       return returnJSON(retCode, retMessage)
    # Check connexion
 
@@ -528,6 +530,70 @@ def userInfos():
    retMessage = "Success"
    
    return returnJSON(retCode, retMessage, response)
+
+@app.route('/update-profile', methods = ['POST'])
+def updateProfile():
+   # Check connexion
+   retCode = -1
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if retCode == -1:
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   password_hash = request.form.get("password")
+   newUsername = request.form.get("new_username")
+   newPassword = request.form.get("new_password")
+
+   # Check if password field is set
+   if password_hash != None:
+      password_hash = hashlib.sha512(password_hash.encode()).hexdigest()
+   else:
+      return returnJSON(0, "Password incorrect")
+
+   if (newUsername == None or newUsername == "") and (newPassword == None or newPassword == ""):
+      return returnJSON(0, "Nothing to change")
+
+   user = db.checkUserCredentials(username, password_hash)
+   if len(user) < 1:
+      return returnJSON(-1, "Password incorrect")
+
+   if newPassword != None:
+      newPassword = hashlib.sha512(newPassword.encode()).hexdigest()
+
+   # We can start updating the profile now
+   retCode, retMessage = db.changeUserInfos(newUsername, newPassword, user_id)
+
+   return returnJSON(retCode, retMessage)
+
+@app.route('/generate-new-token', methods = ['POST'])
+def generateNewToken():
+   # Check connexion
+   retCode = -1
+   retMessage = "Wrong token or x-access-token header not set"
+   retCode, user_id, username = checkAuth()
+   if retCode == -1:
+      return returnJSON(retCode, retMessage)
+   # Check connexion
+
+   password = request.form.get("password")
+
+   # Check if password field is set
+   if password != None:
+      password = hashlib.sha512(password.encode()).hexdigest()
+   else:
+      return returnJSON(0, "Password incorrect")
+
+   user = db.checkUserCredentials(username, password)
+   if len(user) < 1:
+      return returnJSON(-1, "Password incorrect")
+
+   # We can start changing the token now
+   retCode, retMessage, token = db.changeUserToken(user_id)
+
+   return returnJSON(retCode, retMessage, {'token': token})
+
+""" Check authentication """
 
 def checkAuth():
    token = request.headers.get('x-access-token')
@@ -538,13 +604,15 @@ def checkAuth():
    elif not isinstance(tokenGet, type(None)) and tokenGet != "":
       token = tokenGet
    else:
-      return False, 0, ""
+      return -1, 0, ""
    
    user = db.checkToken(token)
    if len(user) > 0:
       return True, user[0][0], user[0][1]
 
-   return False, 0, ""
+   return -1, 0, ""
+
+""" 404 page handler """
 
 @app.errorhandler(404)
 def page_not_found(error):

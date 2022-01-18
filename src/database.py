@@ -153,6 +153,30 @@ class DatabaseHandler:
             token = user[0][3]
             return 0, "Success", {"token": token}
 
+    def changeUserInfos(self, newUsername, newPassword, user_id):
+        if newUsername != None and newUsername != "":
+            try:
+                cursorObj = self.con.cursor()
+                cursorObj.execute("UPDATE users SET username = ? WHERE id = ?", (newUsername, user_id))
+                self.con.commit()
+            except:
+                return -1, "This username already exist"
+        if newPassword != None and newPassword != "":
+            cursorObj = self.con.cursor()
+            cursorObj.execute("UPDATE users SET password_hash = ? WHERE id = ?", (newPassword, user_id))
+            self.con.commit()
+            
+        return 0, "User updated successfully"
+
+    def changeUserToken(self, user_id):
+        token = secrets.token_urlsafe(48)
+
+        cursorObj = self.con.cursor()
+        cursorObj.execute("UPDATE users SET token = ? WHERE id = ?", (token, user_id))
+        self.con.commit()
+            
+        return 0, "User token updated successfully", token
+
     def setDatabaseInformations(self, name, description):
         cursorObj = self.con.cursor()
         cursorObj.execute("UPDATE database_informations SET name = ?, description = ?", (name, description))
