@@ -493,13 +493,14 @@ Nothing \o/
 def register():
    retCode = -1
    retMessage = "Failed to create user"
-   username = request.form.get("username")
-   password = request.form.get("password")
+   c = request.json
+   if not request.is_json():
+      return returnJSON(-1, "Please send a json")
 
-   if username == None or password == None:
+   if "username" not in c or "password" not in c:
       return returnJSON(-1, "Missing parameters")
 
-   retCode, retMessage, token = db.createUser(username, password)
+   retCode, retMessage, token = db.createUser(c["username"], c["password"])
    return returnJSON(retCode, retMessage, token)
 
 @app.route('/get-token', methods = ['POST'])
