@@ -62,19 +62,18 @@ def updateDatabaseInformations():
    retCode = -1
    retMessage = "Missing parameters"
 
-   name = request.form.get("name")
-   description = request.form.get("description")
-   print(name)
-   print(description)
+   if not request.is_json:
+      return returnJSON(-1, "Please send a json")
+   c = request.json
 
-   if isinstance(name, type(None)) or name == "":
+   if "name" not in c or c["name"] == "":
       return returnJSON(retCode, retMessage)
-   elif isinstance(description, type(None)) and description == "":
+   elif "description" not in c or c["description"] == "":
       return returnJSON(retCode, retMessage)
    else:
       retCode = 0
       retMessage = "Database informations updated successfully"
-      db.setDatabaseInformations(name, description)
+      db.setDatabaseInformations(c["name"], c["description"])
 
    return returnJSON(retCode, retMessage)
 
@@ -355,13 +354,17 @@ def CreatePlaylist():
    # Check connexion
 
    retMessage = "Failed to create playlist"
-   name = request.form.get("name")
-   description = request.form.get("description")
+   if not request.is_json:
+      return returnJSON(-1, "Please send a json")
+   c = request.json
 
-   if name == None or description == None:
+   if "name" not in c or "description" not in c:
       return returnJSON(-1, "Missing parameters")
 
-   retCode, retMessage, id = db.createPlaylistForUser(name, description, user_id)
+   if c["name"] == "":
+      return returnJSON(-1, "Playlist name can't be empty")
+
+   retCode, retMessage, id = db.createPlaylistForUser(c["name"], c["description"], user_id)
    return returnJSON(retCode, retMessage, id)
 
 @app.route('/update-playlist/<int:playlist_id>', methods = ['POST'])
@@ -375,16 +378,17 @@ def UpdatePlaylist(playlist_id:int):
    # Check connexion
 
    retMessage = "Failed to update playlist"
-   name = request.form.get("name")
-   description = request.form.get("description")
+   if not request.is_json:
+      return returnJSON(-1, "Please send a json")
+   c = request.json
 
-   if name == None or description == None:
+   if "name" not in c or "description" not in c:
       return returnJSON(-1, "Missing parameters")
 
-   if name == "":
+   if c["name"] == "":
       return returnJSON(-1, "Playlist name can't be empty")
 
-   retCode, retMessage = db.updatePlaylistForUser(playlist_id, name, description, user_id)
+   retCode, retMessage = db.updatePlaylistForUser(playlist_id, c["name"], c["description"], user_id)
 
    return returnJSON(retCode, retMessage, {})
 
@@ -399,12 +403,14 @@ def AddMusicsToPlaylist(playlist_id:int):
    # Check connexion
 
    retMessage = "Failed adding musics to playlist"
-   musics = request.form.get("musics")
+   if not request.is_json:
+      return returnJSON(-1, "Please send a json")
+   c = request.json
 
-   if musics == None or musics == "":
+   if "musics" not in c or c["musics"] == "":
       return returnJSON(-1, "Missing parameters")
 
-   musics = musics.split(";")
+   musics = c["musics"].split(";")
 
    retCode, retMessage, added = db.addMusicsToPlaylistForUser(playlist_id, musics, user_id)
 
@@ -449,12 +455,14 @@ def RemoveMusicsFromPlaylist(playlist_id:int):
    # Check connexion
 
    retMessage = "Failed removing musics to playlist"
-   musics = request.form.get("musics")
-
-   if musics == None or musics == "":
+   if not request.is_json:
+      return returnJSON(-1, "Please send a json")
+   c = request.json
+   
+   if "musics" not in c or c["musics"] == "":
       return returnJSON(-1, "Missing parameters")
 
-   musics = musics.split(";")
+   musics = c["musics"].split(";")
 
    retCode, retMessage, added = db.removeMusicsFromPlaylistForUser(playlist_id, musics, user_id)
 
@@ -493,9 +501,9 @@ Nothing \o/
 def register():
    retCode = -1
    retMessage = "Failed to create user"
-   c = request.json
    if not request.is_json:
       return returnJSON(-1, "Please send a json")
+   c = request.json
 
    if "username" not in c or "password" not in c:
       return returnJSON(-1, "Missing parameters")
@@ -507,13 +515,14 @@ def register():
 def getToken():
    retCode = -1
    retMessage = "Failed to create user"
-   username = request.form.get("username")
-   password = request.form.get("password")
+   if not request.is_json:
+      return returnJSON(-1, "Please send a json")
+   c = request.json
 
-   if username == None or password == None:
+   if "username" not in c or "password" not in c:
       return returnJSON(-1, "Missing parameters")
 
-   retCode, retMessage, token = db.getUserToken(username, password)
+   retCode, retMessage, token = db.getUserToken(c["username"], c["password"])
    return returnJSON(retCode, retMessage, token)
 
 @app.route('/user-infos')
@@ -542,28 +551,33 @@ def updateProfile():
       return returnJSON(retCode, retMessage)
    # Check connexion
 
-   password_hash = request.form.get("password")
-   newUsername = request.form.get("new_username")
-   newPassword = request.form.get("new_password")
+   if not request.is_json:
+      return returnJSON(-1, "Please send a json")
+   c = request.json
+
+   if "password" not in c or "new_username" not in c or "new_password" not in c:
+      return returnJSON(-1, "Missing parameters")
+
+   retCode, retMessage, token = db.getUserToken(c["username"], c["password"])
 
    # Check if password field is set
-   if password_hash != None:
-      password_hash = hashlib.sha512(password_hash.encode()).hexdigest()
+   if "password" in c:
+      c["password"] = hashlib.sha512(c["password"].encode()).hexdigest()
    else:
-      return returnJSON(0, "Password incorrect")
+      return returnJSON(0, "Incorrect password")
 
-   if (newUsername == None or newUsername == "") and (newPassword == None or newPassword == ""):
+   if ("new_username" not in c or c["new_username"] == "") and ("new_password" not in c or c["new_password"] == ""):
       return returnJSON(0, "Nothing to change")
 
-   user = db.checkUserCredentials(username, password_hash)
+   user = db.checkUserCredentials(c["new_username"], c["password"])
    if len(user) < 1:
-      return returnJSON(-1, "Password incorrect")
+      return returnJSON(-1, "Incorrect password")
 
    if newPassword != None:
       newPassword = hashlib.sha512(newPassword.encode()).hexdigest()
 
    # We can start updating the profile now
-   retCode, retMessage = db.changeUserInfos(newUsername, newPassword, user_id)
+   retCode, retMessage = db.changeUserInfos(c["new_username"], c["new_password"], user_id)
 
    return returnJSON(retCode, retMessage)
 
@@ -577,17 +591,19 @@ def generateNewToken():
       return returnJSON(retCode, retMessage)
    # Check connexion
 
-   password = request.form.get("password")
+   if not request.is_json:
+      return returnJSON(-1, "Please send a json")
+   c = request.json
 
    # Check if password field is set
-   if password != None:
-      password = hashlib.sha512(password.encode()).hexdigest()
+   if "password" in c:
+      c["password"] = hashlib.sha512(c["password"].encode()).hexdigest()
    else:
-      return returnJSON(0, "Password incorrect")
+      return returnJSON(0, "Incorrect password")
 
-   user = db.checkUserCredentials(username, password)
+   user = db.checkUserCredentials(username, c["password"])
    if len(user) < 1:
-      return returnJSON(-1, "Password incorrect")
+      return returnJSON(-1, "Incorrect password")
 
    # We can start changing the token now
    retCode, retMessage, token = db.changeUserToken(user_id)
