@@ -494,7 +494,7 @@ def register():
    retCode = -1
    retMessage = "Failed to create user"
    c = request.json
-   if not request.is_json():
+   if not request.is_json:
       return returnJSON(-1, "Please send a json")
 
    if "username" not in c or "password" not in c:
